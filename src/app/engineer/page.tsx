@@ -10,13 +10,13 @@ export default function ProductsPage() {
       const router = useRouter();
 
       const handleViewUser = (userId: number) => {
-    router.push(`/user/${userId}`);
+    router.push(`/engineer/${userId}`);
   };
 
   return (
       <GenericDataManager
-            endpoint="user"
-            title=""
+            endpoint="engineer"
+            title="engineer"
             columns={[
               { 
                 key: 'id', 
@@ -62,40 +62,60 @@ export default function ProductsPage() {
                 sortable: true,
                 render: (item) => item.phone || 'N/A'
               },
-              { 
-                key: 'orders', 
-                label: 'Orders', 
-                sortable: true,
-                render: (item) => (
-                  <span className="font-medium">
-                    {item.orders?.length || 0}
-                  </span>
-                )
-              },
+           
           
-              {
-                key: 'actions',
-                label: 'Actions',
-                render: (item) => (
-                  <button
-                    onClick={() => handleViewUser(item.id)}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+              // {
+              //   key: 'actions',
+              //   label: 'Actions',
+              //   render: (item) => (
+              //     <button
+              //       onClick={() => handleViewUser(item.id)}
+              //       className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
                       
-                     'bg-gray-700 hover:bg-gray-600 text-white'
-                    }`}
-                  >
-                    <Eye size={16} />
-                    View Details
-                  </button>
-                )
-              }
+              //        'bg-gray-700 hover:bg-gray-600 text-white'
+              //       }`}
+              //     >
+              //       <Eye size={16} />
+              //       View Details
+              //     </button>
+              //   )
+              // }
             ]}
 
- initialData={{ role: 'user' }} // علشان يبعت type عند الحفظ
-      defaultFilters={{ role: 'user' }}
 
-            showAddButton={false}
-            showEditButton={false}
+     formFields={[
+        { 
+          name: 'name', 
+          label: 'engineer Name', 
+          type: 'text', 
+          required: true,
+          placeholder: 'Enter engineer name'
+        },
+        { 
+          name: 'phone', 
+          label: 'phone', 
+          type: 'text', 
+          required: false,
+          placeholder: 'Enter engineer phone )'
+        },
+     
+        { 
+          name: 'password', 
+          label: 'password ', 
+          type: 'password', 
+          required: true,
+              placeholder: 'Enter engineer password )'
+
+        },
+     
+      ]}
+
+
+ initialData={{ role: 'engineer' }} // علشان يبعت type عند الحفظ
+      defaultFilters={{ role: 'engineer' }}
+
+            showAddButton={true}
+            showEditButton={true}
             showDeleteButton={true}
             showBulkActions={true}
             showDeletedToggle={true}

@@ -34,7 +34,7 @@ export default function Navbar({
   const favorites = [
     { name: 'Dashboard', url: '/' },
     { name: 'User', url: '/user' },
-    { name: 'Order', url: '/orders' },
+    { name: 'slider', url: '/slider' },
   ]
 
   return (

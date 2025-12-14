@@ -5,8 +5,9 @@ import { SelectField } from "./SelectField";
 import { ClassSelector } from "@/components/Tablecomponents/ClassSelector";
 import { ImageUploader } from "@/components/Tablecomponents/ImageUpload";
 import { MultiImageUploader } from "@/components/Tablecomponents/MultiImageUploader";
+import { MediaOrUploadSelector } from "@/components/Tablecomponents/MediaOrUploadSelector";
 import { Switch } from "@/components/Tablecomponents/Switch";
-
+import { MediaSelector } from "./MediaSelector";
 interface FormFieldProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   field: any;
@@ -123,6 +124,48 @@ export const FormFieldComponent: React.FC<FormFieldProps> = ({
       </div>
     );
   }
+// أضف معالجة MediaOrUploadSelector
+ // ✅ معالجة MediaSelector
+  if (field.type === "custom" && field.component === MediaSelector) {
+    return (
+      <div className={`space-y-2 ${compact ? 'col-span-2' : 'col-span-1'}`}>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+          {field.label}
+          {field.required && <span className="text-red-500 ml-1">*</span>}
+        </label>
+        <MediaSelector
+          value={value}
+          onChange={onChange}
+          label={field.label}
+          required={field.required}
+          endpoint={field.props?.endpoint || "/media"}
+          type={field.props?.type || "image"}
+        />
+      </div>
+    );
+  }
+
+  // ✅ معالجة MediaOrUploadSelector - المكون الجديد
+  if (field.type === "custom" && field.component === MediaOrUploadSelector) {
+    return (
+      <div className={`space-y-2 ${compact ? 'col-span-2' : 'col-span-1'}`}>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+          {field.label}
+          {field.required && <span className="text-red-500 ml-1">*</span>}
+        </label>
+        <MediaOrUploadSelector
+          value={value}
+          onChange={onChange}
+          label={field.label}
+          required={field.required}
+          endpoint={field.props?.endpoint || "/media"}
+          type={field.props?.type || "image"}
+          accept={field.props?.accept}
+        />
+      </div>
+    );
+  }
+
 
   // ✅ معالجة حقل التحديد (select)
   if (field.type === "select") {

@@ -79,13 +79,13 @@ export function useGenericDataManager({
               paginate: true,
               deleted: false
             };
-            json = await apiFetch(`/back${data.endpoint}/index`, {
+            json = await apiFetch(`${data.endpoint}/index`, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify(payload)
             });
           } else {
-            json = await apiFetch(`/back${data.endpoint}`);
+            json = await apiFetch(`${data.endpoint}`);
           }
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           if (json && Array.isArray((json as any).data)) {
@@ -130,7 +130,7 @@ export function useGenericDataManager({
         ...(showingDeleted && { deleted: true }),
       };
 
-      const responseData = await apiFetch(`/back/${endpoint}/index`, {
+      const responseData = await apiFetch(`/${endpoint}/index`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -218,10 +218,10 @@ export function useGenericDataManager({
     if (!confirm(message)) return;
 
     try {
-      await apiFetch(`/back/${endpoint}/forceDelete`, {
+      await apiFetch(`/${endpoint}/forceDelete`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ids: selectedIds }),
+        body: JSON.stringify({ items: selectedIds }),
       });
 
       queryClient.invalidateQueries({ queryKey: [endpoint] });
@@ -289,7 +289,7 @@ export function useGenericDataManager({
     if (!confirm(message)) return;
 
     if (showingDeleted) {
-      const promises = allIds.map(id => apiFetch(`/back/${endpoint}/forceDelete`, {
+      const promises = allIds.map(id => apiFetch(`/${endpoint}/forceDelete`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ is: [id] }),
@@ -320,12 +320,12 @@ export function useGenericDataManager({
         const formDataObj = sendData as FormData;
         if (editingItem?.id) {
           formDataObj.append('_method', 'PUT');
-          return apiFetch(`/back/${endpoint}/${editingItem.id}`, {
+          return apiFetch(`/${endpoint}/${editingItem.id}`, {
             method: "POST",
             body: formDataObj,
           });
         } else {
-          return apiFetch(`/back/${endpoint}`, {
+          return apiFetch(`/${endpoint}`, {
             method: "POST",
             body: formDataObj,
           });
@@ -335,13 +335,13 @@ export function useGenericDataManager({
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         if ((clean as any).id) {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          return apiFetch(`/back/${endpoint}/${(clean as any).id}`, {
+          return apiFetch(`/${endpoint}/${(clean as any).id}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(clean),
           });
         } else {
-          return apiFetch(`/back/${endpoint}`, {
+          return apiFetch(`/${endpoint}`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ ...initialData, ...clean }),
@@ -375,10 +375,10 @@ export function useGenericDataManager({
 
   const deleteItemMutation = useMutation<unknown, Error, { id: number; title: string }>({
     mutationFn: async ({ id }) => {
-      return await apiFetch(`/back/${endpoint}/delete`, {
+      return await apiFetch(`/${endpoint}/delete`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ids: [id] }),
+        body: JSON.stringify({ items: [id] }),
       });
     },
     onSuccess: () => {
@@ -392,10 +392,10 @@ export function useGenericDataManager({
 
   const bulkDeleteMutation = useMutation<unknown, Error, number[]>({
     mutationFn: async (ids: number[]) => {
-      return await apiFetch(`/back/${endpoint}/delete`, {
+      return await apiFetch(`/${endpoint}/delete`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ids: ids }),
+        body: JSON.stringify({ items: ids }),
       });
     },
     onSuccess: (_data, vars) => {
@@ -410,10 +410,10 @@ export function useGenericDataManager({
 
   const bulkRestoreMutation = useMutation<unknown, Error, number[]>({
     mutationFn: async (ids: number[]) => {
-      return await apiFetch(`/back/${endpoint}/restore`, {
+      return await apiFetch(`/${endpoint}/restore`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ids: ids }),
+        body: JSON.stringify({ items: ids }),
       });
     },
     onSuccess: (_d, vars) => {
@@ -431,7 +431,7 @@ export function useGenericDataManager({
       return;
     }
     try {
-      await apiFetch(`/back/${endpoint}/${id}/active`, {
+      await apiFetch(`/${endpoint}/${id}/active`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ active: !currentActive }),
@@ -449,6 +449,39 @@ export function useGenericDataManager({
     return !!event?.preventDefault && typeof event.preventDefault === 'function';
   };
 
+
+
+// في useGenericDataManager.ts - دالة uploadImage
+const uploadImage = async (file: File): Promise<number | string | null> => {
+  try {
+    console.log('📤 Uploading image:', file.name, file.size, file.type);
+    
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    // ✅ استخدم apiFetch مباشرة
+    const data = await apiFetch('/media', {
+      method: 'POST',
+      body: formData,
+    });
+    
+    console.log('📥 Upload response:', data);
+    
+    if (data.status === 'success' && data.data && data.data.id) {
+      console.log('✅ Image uploaded successfully, ID:', data.data.id);
+      return data.data.id;
+    } else {
+      console.error('❌ Upload failed:', data.message);
+      toast.error(data.message || 'Failed to upload image');
+      return null;
+    }
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
+    console.error('❌ Error uploading image:', error);
+    toast.error(error.message || 'Failed to upload image');
+    return null;
+  }
+};
 
 // hooks/useGenericDataManager.ts - الجزء اللي محتاج تعديل
 const handleSave = async (e: SaveOptions): Promise<void> => {
@@ -470,7 +503,12 @@ const handleSave = async (e: SaveOptions): Promise<void> => {
     itemData.id = editingItem.id;
   }
 
+  console.log('🔍 ======== START SAVE ========');
   console.log('📸 Form data before processing:', itemData);
+  console.log('🔍 Image field:', itemData.image, 'Type:', typeof itemData.image);
+  console.log('🔍 Text field:', itemData.text);
+  console.log('🔍 Description field:', itemData.description);
+  console.log('🔍 Active field:', itemData.active);
 
   // ✅ Check for files
   hasFiles = Object.values(itemData).some(v => 
@@ -479,7 +517,56 @@ const handleSave = async (e: SaveOptions): Promise<void> => {
     (v && typeof v === 'object' && 'new' in v && Array.isArray(v.new))
   );
 
-  const excludedKeys = ['createdAt', 'updatedAt', '_method'];
+  console.log('📁 Has Files:', hasFiles);
+
+  // 🔥 🔥 🔥 التعديل الجديد: رفع الصور أولاً
+  const uploadedFiles: Record<string, number | string> = {};
+  
+  if (hasFiles) {
+    // ابحث عن جميع الملفات وارفعها
+    for (const [key, value] of Object.entries(itemData)) {
+      if (value instanceof File) {
+        console.log(`📤 Uploading ${key} file:`, value.name);
+        const mediaId = await uploadImage(value);
+        
+        if (mediaId) {
+          uploadedFiles[key] = mediaId;
+          itemData[key] = mediaId; // استبدل الـ File بالـ ID
+          console.log(`✅ ${key} uploaded successfully, ID:`, mediaId);
+        } else {
+          toast.error(`Failed to upload ${key}`);
+          return; // توقف إذا فشل الرفع
+        }
+      }
+      
+      // معالجة gallery إذا كان يحتوي على ملفات جديدة
+      if (key === 'gallery' && value && typeof value === 'object' && 'new' in value && Array.isArray(value.new)) {
+        const gallery = value as { existing: string[]; new: File[] };
+        const uploadedGalleryIds: string[] = [];
+        
+        // رفع كل ملف جديد في الـ gallery
+        for (const file of gallery.new) {
+          if (file instanceof File) {
+            console.log(`📤 Uploading gallery file:`, file.name);
+            const mediaId = await uploadImage(file);
+            if (mediaId) {
+              uploadedGalleryIds.push(String(mediaId));
+              console.log(`✅ Gallery file uploaded, ID:`, mediaId);
+            }
+          }
+        }
+        
+        // تحديث الـ gallery بالـ IDs الجديدة + القديمة
+        const existingUrls = gallery.existing || [];
+        const allItems = [...existingUrls, ...uploadedGalleryIds];
+        itemData[key] = allItems;
+      }
+    }
+  }
+
+  // ⚠️ ⚠️ ⚠️ التعديل الهام: لا تحذف الحقول الفارغة!
+  // الحقول الفارغة يجب أن تظل موجودة لأن الباك قد يحتاجها للتحقق
+  const excludedKeys = ['createdAt', 'updatedAt'];
   Object.keys(itemData).forEach((key) => {
     if (excludedKeys.includes(key)) {
       delete itemData[key];
@@ -492,6 +579,7 @@ const handleSave = async (e: SaveOptions): Promise<void> => {
 
   console.log('🔄 Is Edit Mode:', isEditMode);
   console.log('📁 Has Files:', hasFiles);
+  console.log('📦 Uploaded Files IDs:', uploadedFiles);
   console.log('🎯 Should use FormData:', hasFiles || isEditMode);
 
   if (hasFiles || isEditMode) {
@@ -499,14 +587,20 @@ const handleSave = async (e: SaveOptions): Promise<void> => {
     
     console.log('🔍 Processing fields for FormData:');
     
+    // 🔥 التعديل: إضافة القيم الافتراضية للحقول المطلوبة
+    const requiredFields = ['text', 'description'];
+    requiredFields.forEach(field => {
+      if (!itemData[field]) {
+        itemData[field] = ''; // قيمة افتراضية فارغة بدلاً من undefined/null
+        console.log(`⚠️ Added default value for required field [${field}]`);
+      }
+    });
+    
     Object.entries(itemData).forEach(([key, value]) => {
       console.log(`  Field [${key}]:`, value, `Type:`, typeof value);
       
-      // ✅ الحل: معالجة جميع أنواع البيانات بشكل صحيح
-      if (value === null || value === undefined || value === '') {
-        console.log(`  ⏭️ Skipping empty/null field [${key}]`);
-        return;
-      }
+      // 🔥 🔥 🔥 التعديل الهام: لا تتخطى الحقول الفارغة
+      // أرسل الحقول حتى لو كانت فارغة لأن الباك قد يحتاجها
       
       // 1. Boolean values - إرسالها كـ "1" أو "0"
       if (typeof value === 'boolean') {
@@ -526,15 +620,17 @@ const handleSave = async (e: SaveOptions): Promise<void> => {
       if (key === 'image') {
         console.log(`  🖼️ Image field [${key}]:`, value);
         
-        if (value instanceof File) {
-          console.log(`    📄 Adding new image file:`, value.name);
-          formDataObj.append('image', value);
+        // 🔥 بعد الرفع، القيمة أصبحت ID
+        if (typeof value === 'number' || (typeof value === 'string' && !isNaN(Number(value)))) {
+          console.log(`    🔢 Image is ID (after upload):`, value);
+          formDataObj.append('image', String(value));
         } else if (isEditMode && typeof value === 'string' && value.startsWith('http')) {
           // في وضع التعديل والصورة موجودة كـ URL، أرسل string فارغ
           console.log('    🔗 EDIT MODE - Image is URL, sending empty to preserve');
           formDataObj.append('image', '');
-        } else if (value === '') {
-          console.log('    🗑️ Image is empty string');
+        } else if (value === '' || value === null || value === undefined) {
+          // 🔥 أرسل string فارغ بدلاً من تخطي الحقل
+          console.log(`    🗑️ Image is empty/null, sending empty string`);
           formDataObj.append('image', '');
         }
         return;
@@ -544,37 +640,25 @@ const handleSave = async (e: SaveOptions): Promise<void> => {
       if (key === 'gallery') {
         console.log(`  🖼️ Gallery field [${key}]:`, value);
         
-        if (value && typeof value === 'object') {
-          // حالة Gallery object
-          if ('new' in value && Array.isArray(value.new)) {
-            const galleryValue = value as { existing: string[]; new: File[] };
-            console.log(`    📁 Gallery has ${galleryValue.new.length} new files`);
-            
-            galleryValue.new.forEach((file: File, index: number) => {
-              if (file instanceof File) {
-                console.log(`      📄 Adding gallery file [${index}]:`, file.name);
-                formDataObj.append(`gallery[${index}]`, file);
-              }
-            });
-          } 
-          // حالة Array مباشرة
-          else if (Array.isArray(value)) {
-            console.log(`    📁 Gallery as array with ${value.length} items`);
-            value.forEach((item, index) => {
-              if (item instanceof File) {
-                console.log(`      📄 Adding gallery file [${index}]:`, item.name);
-                formDataObj.append(`gallery[${index}]`, item);
-              }
-            });
-          }
+        if (Array.isArray(value)) {
+          console.log(`    📁 Gallery as array with ${value.length} items`);
+          value.forEach((item, index) => {
+            if (typeof item === 'string' || typeof item === 'number') {
+              formDataObj.append(`gallery[${index}]`, String(item));
+            }
+          });
+        } else if (value === '' || value === null || value === undefined) {
+          // 🔥 أرسل string فارغ إذا كانت فارغة
+          console.log(`    🗑️ Gallery is empty/null, sending empty string`);
+          formDataObj.append('gallery', '');
         }
         return;
       }
       
-      // 5. Files
+      // 5. Files - بعد الرفع لن يكون هناك File objects
       if (value instanceof File) {
-        console.log(`  📄 File field [${key}]:`, value.name);
-        formDataObj.append(key, value);
+        // ⚠️ هذا لن يحدث لأننا رفعنا كل الملفات أولاً
+        console.warn(`  ⚠️ Unexpected File object for [${key}], should have been uploaded already`);
         return;
       }
       
@@ -582,9 +666,7 @@ const handleSave = async (e: SaveOptions): Promise<void> => {
       if (Array.isArray(value)) {
         console.log(`  📋 Array field [${key}] with ${value.length} items`);
         value.forEach((item, index) => {
-          if (item instanceof File) {
-            formDataObj.append(`${key}[${index}]`, item);
-          } else if (item !== null && item !== undefined) {
+          if (item !== null && item !== undefined) {
             formDataObj.append(`${key}[${index}]`, String(item));
           }
         });
@@ -598,9 +680,14 @@ const handleSave = async (e: SaveOptions): Promise<void> => {
         return;
       }
       
-      // 8. Strings والعادي
-      console.log(`  📝 String/other field [${key}]:`, value);
-      formDataObj.append(key, String(value));
+      // 8. Strings والعادي - 🔥 أرسل حتى القيم الفارغة
+      if (value === null || value === undefined) {
+        console.log(`  📝 String field [${key}] is null/undefined, sending empty string`);
+        formDataObj.append(key, '');
+      } else {
+        console.log(`  📝 String/other field [${key}]:`, value);
+        formDataObj.append(key, String(value));
+      }
     });
     
     // ✅ إضافة active لو مش موجودة (خاصة في وضع التعديل)
@@ -614,6 +701,10 @@ const handleSave = async (e: SaveOptions): Promise<void> => {
       } else {
         formDataObj.append('active', '0');
       }
+    } else if (!formDataObj.has('active')) {
+      // 🔥 إضافة قيمة افتراضية لـ active إذا لم تكن موجودة
+      console.log('⚠️ active field not found, adding default value: true');
+      formDataObj.append('active', '1');
     }
     
     const switchFields = ['free_delevery', 'one_year_warranty'];
@@ -628,6 +719,10 @@ const handleSave = async (e: SaveOptions): Promise<void> => {
         } else {
           formDataObj.append(field, '0');
         }
+      } else if (!formDataObj.has(field)) {
+        // 🔥 إضافة قيمة افتراضية للحقول switch إذا لم تكن موجودة
+        console.log(`⚠️ ${field} field not found, adding default value: false`);
+        formDataObj.append(field, '0');
       }
     });
     
@@ -648,6 +743,20 @@ const handleSave = async (e: SaveOptions): Promise<void> => {
       }
     }
     
+    // 🔥 التأكد من أن الحقول المطلوبة موجودة
+    const requiredFieldsInFormData = ['text', 'description', 'active'];
+    requiredFieldsInFormData.forEach(field => {
+      if (!formDataObj.has(field)) {
+        console.log(`🔴 ERROR: Required field [${field}] is missing from FormData!`);
+        // أضف قيمة افتراضية
+        if (field === 'active') {
+          formDataObj.append(field, '1');
+        } else {
+          formDataObj.append(field, '');
+        }
+      }
+    });
+    
     dataToSend = formDataObj;
     isFormData = true;
   } else {
@@ -656,23 +765,31 @@ const handleSave = async (e: SaveOptions): Promise<void> => {
     
     const clean: Record<string, unknown> = {};
     Object.entries(itemData).forEach(([key, value]) => {
-      if (value === null || value === undefined || value === '') {
-        return;
-      }
-      
-      // ✅ معالجة Boolean للـ JSON
-      if (typeof value === 'boolean') {
+      // 🔥 في JSON، أرسل حتى القيم الفارغة
+      if (value === null || value === undefined) {
+        clean[key] = '';
+      } else if (typeof value === 'boolean') {
         clean[key] = value;
-      } 
-      // ✅ معالجة switch fields كـ strings
-      else if (typeof value === 'string' && (value === 'true' || value === 'false')) {
+      } else if (typeof value === 'string' && (value === 'true' || value === 'false')) {
         clean[key] = value === 'true';
-      }
-      else {
+      } else {
         clean[key] = value;
       }
       
       console.log(`  ${key}:`, clean[key], `(type: ${typeof clean[key]})`);
+    });
+    
+    // 🔥 التأكد من الحقول المطلوبة في JSON
+    const requiredFields = ['text', 'description', 'active'];
+    requiredFields.forEach(field => {
+      if (!(field in clean)) {
+        console.log(`⚠️ Adding default value for required field [${field}] in JSON`);
+        if (field === 'active') {
+          clean[field] = true;
+        } else {
+          clean[field] = '';
+        }
+      }
     });
     
     dataToSend = clean as Entity;
@@ -681,6 +798,7 @@ const handleSave = async (e: SaveOptions): Promise<void> => {
   console.log('🎯 Final data to send:', dataToSend);
   console.log('📦 Is FormData:', isFormData);
   console.log('🔄 Keep open:', keepOpen);
+  console.log('🔍 ======== END SAVE ========');
 
   saveItemMutation.mutate({ 
     data: dataToSend, 
@@ -688,11 +806,14 @@ const handleSave = async (e: SaveOptions): Promise<void> => {
     keepOpen 
   });
 };
+
+
+
   const handleRestore = async (id: number, title: string): Promise<void> => {
     if (!confirm(`Are you sure you want to restore "${title}"?`)) return;
 
     try {
-      await apiFetch(`/back/${endpoint}/restore`, {
+      await apiFetch(`/${endpoint}/restore`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ items: [id] }),
@@ -709,7 +830,7 @@ const handleSave = async (e: SaveOptions): Promise<void> => {
     if (!confirm(`⚠️ Are you sure you want to permanently delete "${title}"? This action cannot be undone!`)) return;
 
     try {
-      await apiFetch(`/back/${endpoint}/forceDelete`, {
+      await apiFetch(`/${endpoint}/forceDelete`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ items: [id] }),

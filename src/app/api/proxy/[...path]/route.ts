@@ -1,7 +1,7 @@
 // src/app/api/proxy/[...path]/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 
-const baseUrl = process.env.TARGET_API || 'https://job.professionalacademyedu.com/api';
+const baseUrl = process.env.TARGET_API || 'https://procnctech.dentin.cloud/api';
 
 async function proxyRequest(
   method: string,
@@ -86,7 +86,7 @@ export async function POST(request: NextRequest) {
 
     // معالجة تسجيل الدخول
     const res = NextResponse.json(data, { status: response.status });
-    if (endpoint === 'login/admin' && response.ok && data && data.token) {
+    if (endpoint === 'admin/login' && response.ok && data && data.token) {
       res.cookies.set({
         name: 'token',
         value: data.token,

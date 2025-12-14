@@ -43,8 +43,8 @@ export default function AuthPage() {
         toast.success('Login successful!')
 
         // ✅ لو دليفري -> روح لصفحة /delivery (بتستخدم endpoint "man-delivery")
-        if (userType === 'delivery' || userRole === 'delivery') {
-          router.push('/delivery')
+        if (userType === 'company' || userRole === 'company') {
+          router.push('/company')
         } else {
           router.push('/')
         }
@@ -197,7 +197,7 @@ export default function AuthPage() {
                 <FiMail className="text-indigo-400" />
               </div>
               <input
-                type="email"
+                type="text"
                 style={{borderRadius: '0.75rem'}}
                 id="email"
                 value={email}

@@ -4,19 +4,20 @@ import GenericDataManager from "@/components/Tablecomponents/GenericDataManager"
 import { MultiImageUploader } from "@/components/Tablecomponents/MultiImageUploader";
 import { Eye, Search, Filter, Moon, Sun } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { MediaOrUploadSelector } from "@/components/Tablecomponents/MediaOrUploadSelector"; // 🔥 استيراد MediaSelector
 
 
 export default function ProductsPage() {
       const router = useRouter();
 
       const handleViewUser = (userId: number) => {
-    router.push(`/user/${userId}`);
+    router.push(`/company/${userId}`);
   };
 
   return (
       <GenericDataManager
-            endpoint="user"
-            title=""
+            endpoint="company"
+            title="Company"
             columns={[
               { 
                 key: 'id', 
@@ -27,14 +28,14 @@ export default function ProductsPage() {
                 )
               },
               { 
-                key: 'name', 
-                label: 'Name', 
+                key: 'company_name', 
+                label: 'company_name', 
                 sortable: true,
                 render: (item) => (
                   <div className="flex items-center gap-3">
-                    {item.avatar ? (
+                    {item.imageUrl ? (
                       <img 
-                        src={item.avatar} 
+                        src={item.imageUrl} 
                         alt={item.name}
                         className="w-8 h-8 rounded-full object-cover"
                       />
@@ -46,32 +47,26 @@ export default function ProductsPage() {
                       </div>
                     )}
                     <div>
-                      <div className="font-medium">{item.name || 'No Name'}</div>
+                      <div className="font-medium">{item.company_name || 'No Name'}</div>
                       <div className="text-xs text-gray-500 dark:text-gray-400">
-                        {item.email}
+                        {item.company_description}
+                      </div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400">
+                        {item.company_address}
                       </div>
                     </div>
                   </div>
                 )
               },
-          
-            
-              { 
+           { 
                 key: 'phone', 
-                label: 'Phone', 
+                label: 'phone', 
                 sortable: true,
-                render: (item) => item.phone || 'N/A'
+           
               },
-              { 
-                key: 'orders', 
-                label: 'Orders', 
-                sortable: true,
-                render: (item) => (
-                  <span className="font-medium">
-                    {item.orders?.length || 0}
-                  </span>
-                )
-              },
+               
+            
+           
           
               {
                 key: 'actions',
@@ -91,11 +86,63 @@ export default function ProductsPage() {
               }
             ]}
 
- initialData={{ role: 'user' }} // علشان يبعت type عند الحفظ
-      defaultFilters={{ role: 'user' }}
+     formFields={[
+        { 
+          name: 'company_name', 
+          label: 'company_name Name', 
+          type: 'text', 
+          required: true,
+          placeholder: 'Enter company_name '
+        },
+          { 
+          name: 'company_description', 
+          label: 'company_description', 
+          type: 'text', 
+          required: false,
+          
+        },
+       {
+          name: 'company_address',
+          label: 'company_address',
+          type: 'text',
+      
+          required: true,
+          placeholder: ' company_address',
+        },
+          {
+          name: 'phone',
+          label: 'phone',
+          type: 'text',
+      
+          required: true,
+          placeholder: ' phone',
+        },
+            {
+          name: 'password',
+          label: 'password',
+          type: 'password',
+      
+          required: false,
+          placeholder: ' password',
+        },
+        {
+             name: "image",
+             label: "Slider Image",
+             type: "custom",
+             component: MediaOrUploadSelector, // ✅ استخدم MediaSelector مباشرة
+             useExistingMedia: true, // ✅ أضف هذه الخاصية
+             mediaType: "image", // ✅ نوع الوسائط
+             required: true,
+             allowUpload: true,
+           },
+     
+      ]}
 
-            showAddButton={false}
-            showEditButton={false}
+
+ initialData={{ role: "company" }} // علشان يبعت type عند الحفظ
+      defaultFilters={{ role: "company" }}
+            showAddButton={true}
+            showEditButton={true}
             showDeleteButton={true}
             showBulkActions={true}
             showDeletedToggle={true}

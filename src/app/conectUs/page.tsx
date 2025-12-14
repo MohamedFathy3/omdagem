@@ -8,7 +8,7 @@ export default function RentsPage() {
 
   return (
     <GenericDataManager
-      endpoint="contacts"
+      endpoint="contactus"
       title="contacts"
       columns={[
        
@@ -46,7 +46,7 @@ export default function RentsPage() {
       showDeleteButton={false}
       showBulkActions={false}
       showDeletedToggle={false}
-      
+      showActiveToggle={false}
       // الفلترز المتاحة
       availableFilters={[]}
     />

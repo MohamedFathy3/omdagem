@@ -4,19 +4,20 @@ import GenericDataManager from "@/components/Tablecomponents/GenericDataManager"
 import { MultiImageUploader } from "@/components/Tablecomponents/MultiImageUploader";
 import { Eye, Search, Filter, Moon, Sun } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { MediaOrUploadSelector } from "@/components/Tablecomponents/MediaOrUploadSelector"; // 🔥 استيراد MediaSelector
 
 
 export default function ProductsPage() {
       const router = useRouter();
 
       const handleViewUser = (userId: number) => {
-    router.push(`/user/${userId}`);
+    router.push(`/product/${userId}`);
   };
 
   return (
       <GenericDataManager
-            endpoint="user"
-            title=""
+            endpoint="product"
+            title="Product"
             columns={[
               { 
                 key: 'id', 
@@ -32,19 +33,7 @@ export default function ProductsPage() {
                 sortable: true,
                 render: (item) => (
                   <div className="flex items-center gap-3">
-                    {item.avatar ? (
-                      <img 
-                        src={item.avatar} 
-                        alt={item.name}
-                        className="w-8 h-8 rounded-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
-                        <span className="text-xs font-medium">
-                          {item.name?.charAt(0) || 'U'}
-                        </span>
-                      </div>
-                    )}
+                 
                     <div>
                       <div className="font-medium">{item.name || 'No Name'}</div>
                       <div className="text-xs text-gray-500 dark:text-gray-400">
@@ -54,24 +43,26 @@ export default function ProductsPage() {
                   </div>
                 )
               },
-          
+           { 
+                key: 'description', 
+                label: 'Description', 
+                sortable: false,
+           
+              },
+                {
+        key: "imageUrl",
+        label: "Image",
+        sortable: false,
+        render: (row) => (
+          <img 
+            src={row.imageUrl} 
+            alt={row.text || "maintenance Image"}
+            className="w-16 h-16 object-cover rounded-lg"
+          />
+        )
+      },
             
-              { 
-                key: 'phone', 
-                label: 'Phone', 
-                sortable: true,
-                render: (item) => item.phone || 'N/A'
-              },
-              { 
-                key: 'orders', 
-                label: 'Orders', 
-                sortable: true,
-                render: (item) => (
-                  <span className="font-medium">
-                    {item.orders?.length || 0}
-                  </span>
-                )
-              },
+           
           
               {
                 key: 'actions',
@@ -91,11 +82,41 @@ export default function ProductsPage() {
               }
             ]}
 
- initialData={{ role: 'user' }} // علشان يبعت type عند الحفظ
-      defaultFilters={{ role: 'user' }}
+   additionalData={[
+        { key: 'engineer', endpoint: '/engineer' },
+      ]}
+     formFields={[
+        { 
+          name: 'name', 
+          label: 'Product Name', 
+          type: 'text', 
+          required: true,
+          placeholder: 'Enter product name'
+        },
+       {
+          name: 'description',
+          label: 'Description',
+          type: 'text',
+          required: true,
+          placeholder: 'Enter description',
+        },
+        {
+             name: "image",
+             label: "Slider Image",
+             type: "custom",
+             component: MediaOrUploadSelector, // ✅ استخدم MediaSelector مباشرة
+             useExistingMedia: true, // ✅ أضف هذه الخاصية
+             mediaType: "image", // ✅ نوع الوسائط
+             required: true,
+             allowUpload: true,
+           },
+     
+      ]}
 
-            showAddButton={false}
-            showEditButton={false}
+
+
+            showAddButton={true}
+            showEditButton={true}
             showDeleteButton={true}
             showBulkActions={true}
             showDeletedToggle={true}

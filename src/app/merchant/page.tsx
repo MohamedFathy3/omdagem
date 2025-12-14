@@ -4,19 +4,20 @@ import GenericDataManager from "@/components/Tablecomponents/GenericDataManager"
 import { MultiImageUploader } from "@/components/Tablecomponents/MultiImageUploader";
 import { Eye, Search, Filter, Moon, Sun } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { MediaOrUploadSelector } from "@/components/Tablecomponents/MediaOrUploadSelector"; // 🔥 استيراد MediaSelector
 
 
 export default function ProductsPage() {
       const router = useRouter();
 
       const handleViewUser = (userId: number) => {
-    router.push(`/user/${userId}`);
+    router.push(`/merchant/${userId}`);
   };
 
   return (
       <GenericDataManager
-            endpoint="user"
-            title=""
+            endpoint="merchant"
+            title="merchant"
             columns={[
               { 
                 key: 'id', 
@@ -32,19 +33,7 @@ export default function ProductsPage() {
                 sortable: true,
                 render: (item) => (
                   <div className="flex items-center gap-3">
-                    {item.avatar ? (
-                      <img 
-                        src={item.avatar} 
-                        alt={item.name}
-                        className="w-8 h-8 rounded-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
-                        <span className="text-xs font-medium">
-                          {item.name?.charAt(0) || 'U'}
-                        </span>
-                      </div>
-                    )}
+                 
                     <div>
                       <div className="font-medium">{item.name || 'No Name'}</div>
                       <div className="text-xs text-gray-500 dark:text-gray-400">
@@ -55,22 +44,24 @@ export default function ProductsPage() {
                 )
               },
           
+                {
+        key: "imageUrl",
+        label: "Image",
+        sortable: false,
+        render: (row) => (
+          <img 
+            src={row.imageUrl} 
+            alt={row.text || "maintenance Image"}
+            className="w-16 h-16 object-cover rounded-lg"
+          />
+        )
+      },
             
               { 
                 key: 'phone', 
-                label: 'Phone', 
+                label: 'phone', 
                 sortable: true,
-                render: (item) => item.phone || 'N/A'
-              },
-              { 
-                key: 'orders', 
-                label: 'Orders', 
-                sortable: true,
-                render: (item) => (
-                  <span className="font-medium">
-                    {item.orders?.length || 0}
-                  </span>
-                )
+               
               },
           
               {
@@ -91,11 +82,51 @@ export default function ProductsPage() {
               }
             ]}
 
- initialData={{ role: 'user' }} // علشان يبعت type عند الحفظ
-      defaultFilters={{ role: 'user' }}
+     formFields={[
+        { 
+          name: 'name', 
+          label: 'name ', 
+          type: 'text', 
+          required: true,
+          placeholder: 'Enter merchant name'
+        },
+          { 
+          name: 'phone', 
+          label: 'phone', 
+          type: 'text', 
+          required: false,
+          },
+
+
+            { 
+          name: 'facebook_link', 
+          label: 'facebook_link', 
+          type: 'url', 
+          required: false,
+          },
+
+            { 
+          name: 'whatsapp_number', 
+          label: 'whatsapp_number', 
+          type: 'text', 
+          required: false,
+          },
+
+       {
+          name: 'password',
+          label: 'password',
+          type: 'password',
+          required: true,
+          placeholder: 'password',
+        },
+   
+     
+      ]}
+
+
 
             showAddButton={false}
-            showEditButton={false}
+            showEditButton={true}
             showDeleteButton={true}
             showBulkActions={true}
             showDeletedToggle={true}

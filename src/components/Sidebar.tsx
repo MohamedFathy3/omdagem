@@ -28,16 +28,17 @@ type NavItem = {
 
 const navItems: NavItem[] = [
   { name: 'Dashboard', icon: Home, href: '/' },
-  { name: 'orders', icon: Clock, href: '/orders' },
-  { name: 'category', icon: Computer, href: '/category' },
+  { name: 'Slider', icon: Clock, href: '/slider' },
+  { name: 'Engineer', icon: Computer, href: '/engineer' },
   { name: 'User', icon: User, href: '/user' },
-  { name: 'Delivery', icon: Truck, href: '/delivery' },
-  { name: 'Product', icon: Package, href: '/Product' },
-  // { name: 'Brand', icon: Package, href: '/Brand' },
-  // { name: 'Brand2', icon: Package, href: '/brand2' },
-  { name: 'Shipping', icon: Ship, href: '/shippeng' },
-  { name: 'offer', icon: Database, href: '/offer' },
+  { name: 'Maintenance', icon: Truck, href: '/maintenance' },
+  { name: 'Machine', icon: Package, href: '/machine' },
+  { name: 'Merchant', icon: Database, href: '/merchant' },
+  { name: 'Design', icon: Package, href: '/design' },
+  { name: 'Seller', icon: Ship, href: '/seller' },
+  { name: 'Company', icon: Database, href: '/company' },
   { name: 'ContactUs', icon: Megaphone, href: '/conectUs' },
+  { name: 'Products', icon: Database, href: '/product',roles:["company"] }
 ]
 
 export default function Sidebar({

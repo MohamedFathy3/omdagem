@@ -10,13 +10,13 @@ export default function ProductsPage() {
       const router = useRouter();
 
       const handleViewUser = (userId: number) => {
-    router.push(`/delivery/${userId}`);
+    router.push(`/seller/${userId}`);
   };
 
   return (
       <GenericDataManager
-            endpoint="man-delivery"
-            title=""
+            endpoint="seller"
+            title="Seller"
             columns={[
               { 
                 key: 'id', 
@@ -32,9 +32,9 @@ export default function ProductsPage() {
                 sortable: true,
                 render: (item) => (
                   <div className="flex items-center gap-3">
-                    {item.avatar ? (
+                    {item.imageUrl ? (
                       <img 
-                        src={item.avatar} 
+                        src={item.imageUrl} 
                         alt={item.name}
                         className="w-8 h-8 rounded-full object-cover"
                       />
@@ -48,19 +48,16 @@ export default function ProductsPage() {
                     <div>
                       <div className="font-medium">{item.name || 'No Name'}</div>
                       <div className="text-xs text-gray-500 dark:text-gray-400">
-                        {item.email}
+                        {item.address}
+                      </div><div className="text-xs text-gray-500 dark:text-gray-400">
+                        {item.city}
                       </div>
                     </div>
                   </div>
                 )
               },
           
-              { 
-                key: 'email', 
-                label: 'email', 
-                sortable: true,
-                render: (item) => item.phone || 'N/A'
-              },
+            
               { 
                 key: 'phone', 
                 label: 'Phone', 
@@ -68,16 +65,17 @@ export default function ProductsPage() {
                 render: (item) => item.phone || 'N/A'
               },
               { 
-                key: 'orders', 
-                label: 'Orders', 
+                key: 'nature_of_work', 
+                label: 'nature_of_work', 
                 sortable: true,
-                render: (item) => (
-                  <span className="font-medium">
-                    {item.orders?.length || 0}
-                  </span>
-                )
+            
               },
-          
+             { 
+                key: 'workshop_name', 
+                label: 'workshop_name', 
+                sortable: true,
+               
+              },
               {
                 key: 'actions',
                 label: 'Actions',
@@ -96,17 +94,44 @@ export default function ProductsPage() {
               }
             ]}
 
-            formFields={[
-              { name: 'name', label: 'Name', type: 'text', required: true },
-              { name: 'email', label: 'Email', type: 'email', required: true },
-              { name: 'phone', label: 'Phone', type: 'text', required: true },
-              { name: 'password', label: 'password', type: 'password', required: true },
-            ]}
-            showAddButton={true}
-            showEditButton={true}
-            showDeleteButton={true}
-            showBulkActions={true}
-            showDeletedToggle={true}
+
+    formFields={[
+        { 
+          name: 'name', 
+          label: 'name ', 
+          type: 'text', 
+          required: true,
+          placeholder: 'Enter seller name'
+        },
+          { 
+          name: 'phone', 
+          label: 'phone', 
+          type: 'text', 
+          required: false,
+          },
+
+
+
+       {
+          name: 'password',
+          label: 'password',
+          type: 'password',
+          required: true,
+          placeholder: 'password',
+        },
+   
+     
+      ]}
+
+ initialData={{ role: 'seller' }} // علشان يبعت type عند الحفظ
+      defaultFilters={{ role: 'seller' }}
+
+                showAddButton={false}
+      showEditButton={true}
+      showDeleteButton={true}
+      showBulkActions={true}
+      showDeletedToggle={true}
+      
     />
   );
 }

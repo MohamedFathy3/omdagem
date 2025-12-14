@@ -75,6 +75,45 @@ const FormModal: React.FC<FormModalProps> = ({
               processedData.brand_id = foundBrand.id;
             }
           }
+
+    // ✅ إصلاح مشكلة الـ category_id
+        if (field.name === 'engineer_id') {
+          console.log('🔍 CATEGORY FIELD DEBUG:', {
+            category_id: editingItem.engineer_id,
+            category: editingItem.engineer,
+            field: field
+          });
+          
+          // الحالة 1: إذا كان category_id موجود مباشرة
+          if (editingItem.engineer_id) {
+            processedData.engineer_id = editingItem.engineer_id;
+          } 
+          
+          // الحالة 2: إذا كان category كائن به id
+          else if (editingItem.engineer && editingItem.engineer.id) {
+            processedData.engineer_id = editingItem.engineer.id;
+          }
+          // الحالة 3: إذا كان category قيمة مباشرة (رقم)
+          else if (editingItem.engineer && typeof editingItem.engineer === 'number') {
+            processedData.engineer_id = editingItem.engineer;
+          }
+          // الحالة 4: إذا كان category نص (تحويل من الاسم)
+          else if (editingItem.engineer && typeof editingItem.engineer === 'string') {
+            // البحث في additionalQueries عن الـ category المناسب
+            const categories = additionalQueries?.categories?.data || [];
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const foundCategory = categories.find((cat: any) => 
+              cat.name === editingItem.engineer || cat.id.toString() === editingItem.engineer
+            );
+            if (foundCategory) {
+              processedData.engineer_id = foundCategory.id;
+            }
+          }
+          
+          console.log('✅ FINAL CATEGORY ID:', processedData.engineer_id);
+        }
+        
+          
         // ✅ إصلاح مشكلة الـ category_id
         if (field.name === 'category_id') {
           console.log('🔍 CATEGORY FIELD DEBUG:', {

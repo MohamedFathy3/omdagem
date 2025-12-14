@@ -5,6 +5,9 @@ import { FormEvent } from 'react';
 import { FC } from 'react';
 import { MultiImageUploaderProps } from '@/components/Tablecomponents/MultiImageUploader';
 import { ImageUploaderProps } from '@/components/Tablecomponents/ImageUpload';
+import { MediaSelectorProps } from '@/components/Tablecomponents/MediaSelectorProps';
+import { MediaOrUploadSelectorProps } from '@/components/Tablecomponents/MediaOrUploadSelectorProps';
+
 export interface Entity {
   id: number;
   name: string;
@@ -92,7 +95,9 @@ export interface GenericDataManagerProps {
   showFilter?: boolean;
   showBulkActions?: boolean;
   showDeletedToggle?: boolean;
-   initialPerPage?: number
+  initialPerPage?: number;
+  useExistingMedia?: boolean; 
+  mediaType?: 'image' | 'file' | 'all';
   
 }
 
@@ -137,7 +142,9 @@ export type CustomComponent =
   | 'time-selector' 
   | 'MultiImageUploader'
   | FC<MultiImageUploaderProps>
-  | FC<ImageUploaderProps>;
+  | FC<ImageUploaderProps>
+  | FC<MediaSelectorProps>
+  | FC<MediaOrUploadSelectorProps>; 
 
 
 export interface FormField {
@@ -150,13 +157,19 @@ export interface FormField {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   defaultValue?: string | ((formData: Record<string, any>) => string);
   multiple?: boolean;
-  maxFiles?: number; // إضافة هذا الحقل
+  maxFiles?: number;
   accept?: string;
   placeholder?: string;
   rows?: number;
-  component?: CustomComponent; // تحديث النوع
+  component?: CustomComponent;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  props?: Record<string, any>; // إضافة props للمكونات المخصصة
+  props?: Record<string, any>;
+  
+  // 🔥 الخصائص الجديدة للميديا
+  useExistingMedia?: boolean;
+  endpoint?: string;
+  mediaType?: 'image' | 'file' | 'all';
+  allowUpload?:boolean;
 }
 
 export interface MutationResult {

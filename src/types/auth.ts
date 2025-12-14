@@ -23,5 +23,5 @@ export interface LoginCredentials {
 
 export interface AuthResponse {
   token: string;
-  admin: AuthUser;
+  data: AuthUser;
 }

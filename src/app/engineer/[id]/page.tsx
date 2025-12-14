@@ -82,16 +82,16 @@ export default function UserDetailPage() {
       setLoading(true);
       setError(null);
       
-      const data = await apiFetch(`/back/orders/${params.id}`);
+      const data = await apiFetch(`/engineer/${params.id}`);
       
       if (data.result === 'Success') {
         setUser(data.data);
       } else {
-        setError(data.message || 'Failed to fetch user data');
+        setError(data.message || 'Failed to fetch engineer data');
       }
     } catch (error) {
       console.error('Error fetching user data:', error);
-      setError(error instanceof Error ? error.message : 'Failed to load user data');
+      setError(error instanceof Error ? error.message : 'Failed to load engineer data');
     } finally {
       setLoading(false);
     }
@@ -147,7 +147,21 @@ export default function UserDetailPage() {
     }
   };
 
- 
+  const handleDeleteUser = async () => {
+    if (!user || !confirm('Are you sure you want to delete this user?')) return;
+    
+    try {
+      const response = await apiFetch(`/back/user/${user.id}`, {
+        method: 'DELETE',
+      });
+      
+      if (response.result === 'Success') {
+        router.push('/user');
+      }
+    } catch (error) {
+      console.error('Error deleting user:', error);
+    }
+  };
 
   if (loading) {
     return (
@@ -176,10 +190,10 @@ export default function UserDetailPage() {
             </p>
             <div className="flex gap-4 justify-center">
               <button
-                onClick={() => router.push('/user')}
+                onClick={() => router.push('/engineer')}
                 className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
               >
-                Go Back to Users
+                Go Back to engineer
               </button>
               {error && (
                 <button
@@ -210,13 +224,13 @@ export default function UserDetailPage() {
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
           <div className="flex items-center gap-4">
             <button
-              onClick={() => router.push('/users')}
+              onClick={() => router.push('/engineer')}
               className="p-2 rounded-lg bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 shadow transition-colors"
             >
               <ArrowLeft size={20} />
             </button>
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">User Details</h1>
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">engineer Details</h1>
               <p className="text-sm text-gray-600 dark:text-gray-400">
                 ID: US{String(user.id).padStart(3, '0')}
               </p>

@@ -17,6 +17,8 @@ import { MultiImageUploader } from "@/components/Tablecomponents/MultiImageUploa
 import { Switch } from "@/components/Tablecomponents/Switch";
 import FormModal from "@/components/Tablecomponents/FormModal";
 import DataTable from "@/components/Tablecomponents/DataTable";
+import { MediaSelector } from "@/components/Tablecomponents/MediaSelector";
+import { MediaOrUploadSelector } from "@/components/Tablecomponents/MediaOrUploadSelector";
 import { 
   GenericDataManagerProps, 
   CheckboxProps,
@@ -226,10 +228,8 @@ const generateDynamicFilters = (
   return dynamicFilters;
 };
 
-// دالة لمعالجة الحقول المخصصة في الـ formFields
 const processFormFields = (formFields: FormField[]): FormField[] => {
   return formFields.map(field => {
-    // إذا كان الحقل من نوع gallery، حوله لنوع custom مع المكون المناسب
     if (field.name === 'gallery' && field.type === 'file' && field.multiple) {
       return {
         ...field,
@@ -242,6 +242,39 @@ const processFormFields = (formFields: FormField[]): FormField[] => {
           required: field.required || false
         }
       };
+    }
+    
+    // 🔥 إذا كان حقل صورة ويستخدم الوسائط الموجودة
+   if (field.useExistingMedia && (field.type === 'file' || field.type === 'custom')) {
+      // إذا كان معه خاصية allowUpload نستخدم المكون الجديد
+      if (field.allowUpload) {
+        return {
+          ...field,
+          type: 'custom' as const,
+          component: MediaOrUploadSelector,
+          props: {
+            endpoint: field.endpoint || '/media',
+            type: field.mediaType || 'image',
+            label: field.label || 'Image',
+            required: field.required || false,
+            accept: field.accept
+          }
+        };
+      } else {
+        // وإلا نستخدم MediaSelector العادي
+        return {
+          ...field,
+          type: 'custom' as const,
+          component: MediaSelector,
+          props: {
+            endpoint: field.endpoint || '/media',
+            type: field.mediaType || 'image',
+            label: field.label || 'Image',
+            required: field.required || false,
+            accept: field.accept
+          }
+        };
+      }
     }
     
     // إذا كان حقل صورة عادي، استخدم ImageUploader

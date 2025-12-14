@@ -58,7 +58,7 @@ async function fetchUser(): Promise<AuthUser | null> {
 
     console.log('🔐 Using token from localStorage:', token.substring(0, 10) + '...');
     
-    const res = await apiFetch('/back/check-auth/admin', {
+    const res = await apiFetch('/get-admin', {
       headers: {
         'Authorization': `Bearer ${token}`,
       },
@@ -121,7 +121,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const loginMutation = useMutation({
     mutationFn: async (credentials: { email: string; password: string; remember?: boolean }) => {
-      const res = await apiFetch('login/admin', {
+      const res = await apiFetch('admin/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(credentials),
@@ -162,7 +162,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const token = getStoredToken();
       if (token) {
-        await apiFetch('admin/logout', {
+        await apiFetch('admin-logout', {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -191,8 +191,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     switch (role?.toLowerCase()) {
       case 'admin':
         return '/'; // main admin dashboard
-      case 'delivery':
-        return '/DeliveryService'; // delivery dashboard
+      case 'company':
+        return '/company'; // delivery dashboard
       default:
         return '/'; // default home page
     }
@@ -210,7 +210,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     // قواعد خاصة لكل role
-    if (roleLower === 'delivery') {
+    if (roleLower === 'company') {
       // الدليفري مسموح له فقط بالصفحات الخاصة به
       if (!pathLower.startsWith('/delivery/')) {
         return true; // يحتاج توجيه
