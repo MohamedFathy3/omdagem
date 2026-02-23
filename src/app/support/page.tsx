@@ -92,7 +92,7 @@ const SupportPage = () => {
             {/* Quick Contact Buttons */}
             <div className="flex flex-wrap justify-center gap-4">
               <a 
-                href="tel:+1234567890" 
+                href="tel:+201149040303" 
                 className="bg-white text-blue-900 px-8 py-4 rounded-lg font-semibold hover:bg-blue-50 transition flex items-center gap-2"
               >
                 <FaPhone /> Emergency Support: +20 11 49040303
@@ -117,7 +117,7 @@ const SupportPage = () => {
             </div>
             <h3 className="text-xl font-bold mb-2">Phone Support</h3>
             <p className="text-gray-600 mb-2">24/7 Emergency Line</p>
-            <a href="tel:+1234567890" className="text-blue-900 font-semibold hover:underline">
+            <a href="tel:+201149040303" className="text-blue-900 font-semibold hover:underline">
               +20 11 49040303
             </a>
           </div>
