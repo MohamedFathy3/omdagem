@@ -88,7 +88,7 @@ const SupportPage = () => {
             <h1 className="text-5xl font-bold mb-6">CNC World Machining Support</h1>
             <p className="text-2xl mb-8 text-blue-100">Expert Support for Your Machining Needs</p>
             <p className="text-lg text-blue-100 mb-12">
-              We're here to help with technical support, maintenance, and engineering consultation
+              Were here to help with technical support, maintenance, and engineering consultation
             </p>
             
             {/* Quick Contact Buttons */}
