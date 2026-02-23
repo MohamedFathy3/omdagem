@@ -13,8 +13,7 @@ import {
   FaVideo
 } from 'react-icons/fa';
 import Link from 'next/link';
-import MainLayout from '@/components/MainLayout';
-
+import '@/styles/globals.css'
 const SupportPage = () => {
   const supportCategories = [
     {
@@ -78,7 +77,6 @@ const SupportPage = () => {
   ];
 
   return (
-          <MainLayout>
     
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
@@ -250,7 +248,6 @@ const SupportPage = () => {
         </div>
       </footer>
     </div>
-        </MainLayout>
   );
 };
 
