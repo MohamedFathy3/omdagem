@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
 import MainLayout from '@/components/MainLayout';
+import ProtectedRoute from '@/components/ProtectedRoute';
 
 interface Order {
   id: number;
@@ -218,7 +219,9 @@ export default function UserDetailPage() {
   }, 0) || 0;
 
   return (
-    <MainLayout>
+      <ProtectedRoute allowedRoles={['admin']}>
+
+  <MainLayout>
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
@@ -571,5 +574,7 @@ export default function UserDetailPage() {
         </div>
       </div>
     </MainLayout>
+        </ProtectedRoute>
+
   );
 }

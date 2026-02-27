@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
 import MainLayout from '@/components/MainLayout';
+import ProtectedRoute from '@/components/ProtectedRoute';
 
 interface CompanyImage {
   id: number;
@@ -135,6 +136,8 @@ export default function CompanyDetailPage() {
   }
 
   return (
+        <ProtectedRoute allowedRoles={['admin']}>
+
     <MainLayout>
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
@@ -488,5 +491,7 @@ export default function CompanyDetailPage() {
         </div>
       </div>
     </MainLayout>
+    </ProtectedRoute>
+
   );
 }

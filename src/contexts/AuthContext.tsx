@@ -64,8 +64,29 @@ async function fetchUser(): Promise<AuthUser | null> {
       },
     });
     
-    if (res && (res.data || res.admin || res.id)) {
-      return res.data || res.admin || res;
+    console.log('📦 API Response:', res);
+    
+    if (res) {
+      // ✅ دمج البيانات بشكل صحيح
+      if (res.data && res.role) {
+        // الحالة: { role: "admin", data: { ... } }
+        return {
+          ...res.data,
+          role: res.role  // إضافة الـ role من الخارج
+        } as AuthUser;
+      }
+      else if (res.data) {
+        // الحالة: { data: { ... } } بدون role خارجي
+        return res.data as AuthUser;
+      }
+      else if (res.admin) {
+        // الحالة: { admin: { ... } }
+        return res.admin as AuthUser;
+      }
+      else if (res.id) {
+        // الحالة: object عادي
+        return res as AuthUser;
+      }
     }
     
     return null;
@@ -98,22 +119,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     retry: false,
   });
 
+  // ✅ للتشخيص - عرض الـ user object
+  useEffect(() => {
+    if (user) {
+      console.log('👤 Final user object in AuthContext:', user);
+      console.log('👤 User role:', user.role);
+    }
+  }, [user]);
+
   // ✅ التوجيه التلقائي بناء على الـ role
   useEffect(() => {
     if (!isLoading && user && initialCheckDone) {
-      const role = Array.isArray(user.role) ? user.role[0] : user.role;  // ✅ تطبيع الدور
+      const role = Array.isArray(user.role) ? user.role[0] : user.role;
       console.log('👤 User role detected:', role);
       console.log('📍 Current path:', pathname);
       
-      const shouldRedirect = checkPathAccess(pathname, role);            // ✅ نمرّر string
+      const shouldRedirect = checkPathAccess(pathname, role);
       if (shouldRedirect) {
-        const targetPath = getRoleBasedRoute(role);                      // ✅ نمرّر string
+        const targetPath = getRoleBasedRoute(role);
         console.log(`🔄 Redirecting ${role} to: ${targetPath}`);
         router.push(targetPath);
       }
     }
     
-    // علامة أننا عملنا check أول مرة
     if (!isLoading) {
       setInitialCheckDone(true);
     }
@@ -135,10 +163,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.log('✅ Token saved to localStorage');
         queryClient.invalidateQueries({ queryKey: ['user'] });
         
-        // ✅ بعد login نوجه مباشرة بناء على الـ role
         setTimeout(() => {
-          if (data.data?.role || data.role) {
-            const role = data.data?.role || data.role;
+          if (data.role || data.data?.role) {
+            const role = data.role || data.data?.role;
             const targetPath = getRoleBasedRoute(role);
             console.log(`🎯 Login successful, redirecting ${role} to: ${targetPath}`);
             router.push(targetPath);
@@ -178,7 +205,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     queryClient.removeQueries({ queryKey: ['user'] });
     queryClient.clear();
     
-    // التوجيه لصفحة Login
     window.location.href = '/auth';
   };
 
@@ -186,60 +212,47 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     queryClient.setQueryData(['user'], newUser);
   };
 
-  // ✅ دالة لتحديد المسار بناء على الـ role
   const getRoleBasedRoute = (role: string): string => {
     switch (role?.toLowerCase()) {
       case 'admin':
-        return '/'; // main admin dashboard
+        return '/';
       case 'company':
-        return '/company'; // delivery dashboard
+        return '/company';
       default:
-        return '/'; // default home page
+        return '/';
     }
   };
 
-  // ✅ دالة للتحقق من صلاحية الوصول للمسار الحالي
   const checkPathAccess = (path: string, role: string): boolean => {
     const roleLower = role?.toLowerCase();
     const pathLower = path?.toLowerCase();
     
-    // الصفحات المسموحة للجميع
     const publicPaths = ['/auth', '/', '/about', '/contact'];
     if (publicPaths.includes(path) || path.startsWith('/auth/')) {
-      return false; // لا توجيه
+      return false;
     }
 
-    // قواعد خاصة لكل role
     if (roleLower === 'company') {
-      // الدليفري مسموح له فقط بالصفحات الخاصة به
-      if (!pathLower.startsWith('/delivery/')) {
-        return true; // يحتاج توجيه
-      }
-    } else if (roleLower === 'client') {
-      // العميل مسموح له بالصفحات العامة وصفحاته الخاصة
-      if (pathLower.startsWith('/admin/') || pathLower.startsWith('/delivery/')) {
-        return true; // يحتاج توجيه
+      if (!pathLower.startsWith('/company') && !pathLower.startsWith('/product')) {
+        return true;
       }
     }
-    // Admin يصل لكل مكان
     
-    return false; // لا يحتاج توجيه
+    return false;
   };
 
-  // ✅ دالة للتوجيه بناء على الـ role
   const redirectBasedOnRole = () => {
     if (user?.role) {
-      const role = Array.isArray(user.role) ? user.role[0] : user.role;  // ✅
+      const role = Array.isArray(user.role) ? user.role[0] : user.role;
       const targetPath = getRoleBasedRoute(role);
       console.log(`🔄 Redirecting ${role} to: ${targetPath}`);
       router.push(targetPath);
     }
   };
 
-  // ✅ دالة للتحقق من صلاحية الوصول
   const checkAccess = (path: string): boolean => {
     if (!user?.role) return false;
-    const role = Array.isArray(user.role) ? user.role[0] : user.role;    // ✅
+    const role = Array.isArray(user.role) ? user.role[0] : user.role;
     return !checkPathAccess(path, role);
   };
 

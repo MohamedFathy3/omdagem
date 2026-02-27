@@ -26,11 +26,14 @@ export function useGenericDataManager({
   formFields = [],
   initialData = {},
   defaultFilters = {},
-  initialPerPage = 10
+  initialPerPage = 10,
+    filters: externalFilters = {}, // ✅ الفلتر الخارجي (زي company_id)
+  disableAutoFetch = false, 
 }: GenericDataManagerProps): GenericDataManagerState & GenericDataManagerHandlers & {
   data: Entity[];
   pagination: PaginationMeta;
   isLoading: boolean;
+  
   error: Error | null;
   additionalQueries: Record<string, AdditionalQueryResult>;
   saveItemMutation: UseMutationResult<unknown, Error, { data: Entity | FormData; isFormData?: boolean }>;
@@ -56,7 +59,11 @@ export function useGenericDataManager({
   const [selectedItems, setSelectedItems] = useState<Set<number>>(new Set());
   const [formData, setFormData] = useState<Record<string, string | number>>({});
   const [perPage, setPerPageState] = useState<number>(initialPerPage);
-
+  const mergedFilters = {
+    ...defaultFilters,
+    ...filters,
+    ...externalFilters, // الفلتر الخارجي له الأولوية
+  };
   // دالة لتغيير عدد العناصر المعروضة
   const handlePerPageChange = (newPerPage: number) => {
     setPerPageState(newPerPage);
@@ -118,10 +125,12 @@ export function useGenericDataManager({
 
   // Main data query (pagination + server-side filters)
   const { data: itemsData, isLoading, error } = useQuery<ApiResponse>({
-    queryKey: [endpoint, currentPage, showingDeleted, orderBy, orderByDirection, filters, defaultFilters, perPage],
-    queryFn: async (): Promise<ApiResponse> => {
+  queryKey: [endpoint, currentPage, showingDeleted, orderBy, orderByDirection, mergedFilters, perPage, externalFilters],
+      enabled: !disableAutoFetch && Object.keys(externalFilters).length > 0 ? true : !disableAutoFetch,
+
+      queryFn: async (): Promise<ApiResponse> => {
       const payload: FilterPayload = {
-        filters: { ...defaultFilters, ...filters },
+        filters: mergedFilters,
         orderBy,
         orderByDirection,
         perPage: perPage,

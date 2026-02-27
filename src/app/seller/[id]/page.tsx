@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
 import MainLayout from '@/components/MainLayout';
+import ProtectedRoute from '@/components/ProtectedRoute';
 
 interface SellerImage {
   id: number;
@@ -141,6 +142,8 @@ export default function SellerDetailPage() {
   }
 
   return (
+        <ProtectedRoute allowedRoles={['admin']}>
+
     <MainLayout>
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
@@ -159,22 +162,7 @@ export default function SellerDetailPage() {
               </p>
             </div>
           </div>
-          <div className="flex gap-3">
-            <button
-              onClick={() => router.push(`/back/seller/${seller.id}/edit`)}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              <Edit size={18} />
-              Edit Seller
-            </button>
-            <button
-              onClick={handleDeleteSeller}
-              className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-            >
-              <Trash2 size={18} />
-              Delete
-            </button>
-          </div>
+        
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -424,5 +412,7 @@ export default function SellerDetailPage() {
         </div>
       </div>
     </MainLayout>
+        </ProtectedRoute>
+
   );
 }

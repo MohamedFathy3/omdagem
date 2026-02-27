@@ -22,6 +22,7 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Line, LineChart, PolarAngleAxis, PolarGrid, PolarRadiusAxis, Radar, RadarChart, Area, AreaChart, ResponsiveContainer } from "recharts";
+import ProtectedRoute from '@/components/ProtectedRoute';
 
 interface MonthlyData {
   [key: string]: number;
@@ -527,6 +528,9 @@ export default function Home() {
   };
 
   return (
+
+        <ProtectedRoute allowedRoles={['admin']}>
+
     <MainLayout>
       <div className="p-6 space-y-6">
         {/* Header */}
@@ -699,5 +703,6 @@ export default function Home() {
         </div>
       </div>
     </MainLayout>
+        </ProtectedRoute>
   );
 }

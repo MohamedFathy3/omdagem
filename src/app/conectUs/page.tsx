@@ -2,11 +2,14 @@
 'use client';
 import GenericDataManager from "@/components/Tablecomponents/GenericDataManager";
 import { useRouter } from "next/navigation";
+import ProtectedRoute from '@/components/ProtectedRoute';
 
 export default function RentsPage() {
   const router = useRouter();
 
   return (
+        <ProtectedRoute allowedRoles={['admin']}>
+
     <GenericDataManager
       endpoint="contactus"
       title="contacts"
@@ -50,5 +53,6 @@ export default function RentsPage() {
       // الفلترز المتاحة
       availableFilters={[]}
     />
+    </ProtectedRoute>
   );
 }

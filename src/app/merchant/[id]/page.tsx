@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
 import MainLayout from '@/components/MainLayout';
+import ProtectedRoute from '@/components/ProtectedRoute';
 
 interface MerchantData {
   id: number;
@@ -120,6 +121,8 @@ export default function MerchantDetailPage() {
   }
 
   return (
+            <ProtectedRoute allowedRoles={['admin']}>
+    
     <MainLayout>
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
@@ -459,5 +462,7 @@ export default function MerchantDetailPage() {
         </div>
       </div>
     </MainLayout>
+        </ProtectedRoute>
+
   );
 }

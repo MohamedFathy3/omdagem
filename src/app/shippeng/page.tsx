@@ -1,9 +1,11 @@
 // app/orders/page.tsx
 'use client';
 import GenericDataManager from "@/components/Tablecomponents/GenericDataManager";
+import ProtectedRoute from '@/components/ProtectedRoute';
 
 export default function ShippingPage() {
   return (
+      <ProtectedRoute allowedRoles={['admin']}>
     <GenericDataManager
       endpoint="countries-shipping"
       title="Shipping Countries"
@@ -91,5 +93,7 @@ export default function ShippingPage() {
       showBulkActions={true}
       showDeletedToggle={true}
     />
+            </ProtectedRoute>
+
   );
 }

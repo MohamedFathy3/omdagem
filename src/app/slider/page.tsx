@@ -3,9 +3,11 @@
 import GenericDataManager from "@/components/Tablecomponents/GenericDataManager";
 import { MultiImageUploader } from "@/components/Tablecomponents/MultiImageUploader";
 import { MediaOrUploadSelector } from "@/components/Tablecomponents/MediaOrUploadSelector"; // 🔥 استيراد MediaSelector
+import ProtectedRoute from '@/components/ProtectedRoute';
 
 export default function ProductsPage() {
   return (
+      <ProtectedRoute allowedRoles={['admin']}>
     <GenericDataManager
       endpoint="slider"
       title="Slider"
@@ -102,5 +104,7 @@ export default function ProductsPage() {
        
       ]}
     />
-  );
+    
+  </ProtectedRoute>
+);
 }

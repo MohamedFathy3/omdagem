@@ -14,6 +14,8 @@ import {
 } from 'react-icons/fa';
 import Link from 'next/link';
 import '@/styles/globals.css'
+import ProtectedRoute from '@/components/ProtectedRoute';
+
 const SupportPage = () => {
   const supportCategories = [
     {
@@ -77,7 +79,8 @@ const SupportPage = () => {
   ];
 
   return (
-    
+        <ProtectedRoute allowedRoles={['admin']}>
+
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
       <section className="bg-gradient-to-r from-blue-900 to-blue-700 text-white py-20">
@@ -248,6 +251,8 @@ const SupportPage = () => {
         </div>
       </footer>
     </div>
+        </ProtectedRoute>
+
   );
 };
 

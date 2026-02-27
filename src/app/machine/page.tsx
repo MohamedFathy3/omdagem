@@ -5,16 +5,19 @@ import { MultiImageUploader } from "@/components/Tablecomponents/MultiImageUploa
 import { Eye, Search, Filter, Moon, Sun } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { MediaOrUploadSelector } from "@/components/Tablecomponents/MediaOrUploadSelector"; // 🔥 استيراد MediaSelector
+import ProtectedRoute from '@/components/ProtectedRoute';
 
 
 export default function ProductsPage() {
       const router = useRouter();
 
       const handleViewUser = (userId: number) => {
-    router.push(`/merchant/${userId}`);
+    router.push(`/machine/${userId}`);
   };
 
   return (
+        <ProtectedRoute allowedRoles={['admin']}>
+
       <GenericDataManager
             endpoint="used-machine"
             title="used-machine"
@@ -135,5 +138,7 @@ export default function ProductsPage() {
             showBulkActions={true}
             showDeletedToggle={true}
     />
+        </ProtectedRoute>
+
   );
 }

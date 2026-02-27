@@ -4,6 +4,7 @@ import GenericDataManager from "@/components/Tablecomponents/GenericDataManager"
 import { MultiImageUploader } from "@/components/Tablecomponents/MultiImageUploader";
 import { Eye, Search, Filter, Moon, Sun } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import ProtectedRoute from '@/components/ProtectedRoute';
 
 
 export default function ProductsPage() {
@@ -14,6 +15,8 @@ export default function ProductsPage() {
   };
 
   return (
+        <ProtectedRoute allowedRoles={['admin']}>
+
       <GenericDataManager
             endpoint="engineer"
             title="engineer"
@@ -120,5 +123,7 @@ export default function ProductsPage() {
             showBulkActions={true}
             showDeletedToggle={true}
     />
+        </ProtectedRoute>
+
   );
 }

@@ -5,6 +5,7 @@ import { MultiImageUploader } from "@/components/Tablecomponents/MultiImageUploa
 import { Eye, Search, Filter, Moon, Sun } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { MediaOrUploadSelector } from "@/components/Tablecomponents/MediaOrUploadSelector"; // 🔥 استيراد MediaSelector
+import ProtectedRoute from '@/components/ProtectedRoute';
 
 
 export default function ProductsPage() {
@@ -15,6 +16,8 @@ export default function ProductsPage() {
   };
 
   return (
+        <ProtectedRoute allowedRoles={['admin']}>
+
       <GenericDataManager
             endpoint="company"
             title="Company"
@@ -147,5 +150,7 @@ export default function ProductsPage() {
             showBulkActions={true}
             showDeletedToggle={true}
     />
+        </ProtectedRoute>
+
   );
 }

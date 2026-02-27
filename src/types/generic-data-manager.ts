@@ -98,7 +98,10 @@ export interface GenericDataManagerProps {
   initialPerPage?: number;
   useExistingMedia?: boolean; 
   mediaType?: 'image' | 'file' | 'all';
-  
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    filters?: Record<string, any>;           // فلتر إضافي (زي company_id)
+  disableAutoFetch?: boolean;               // منع التحميل التلقائي
+  noDataMessage?: string;          
 }
 
 export interface ColumnDefinition {

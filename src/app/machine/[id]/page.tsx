@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
 import MainLayout from '@/components/MainLayout';
+import ProtectedRoute from '@/components/ProtectedRoute';
 
 interface UserImage {
   id: number;
@@ -152,13 +153,15 @@ export default function UsedMachineDetailPage() {
   }
 
   return (
+        <ProtectedRoute allowedRoles={['admin']}>
+
     <MainLayout>
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
           <div className="flex items-center gap-4">
             <button
-              onClick={() => router.push('/used-machine')}
+              onClick={() => router.push('/machine')}
               className="p-2 rounded-lg bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 shadow transition-colors"
             >
               <ArrowLeft size={20} />
@@ -647,5 +650,7 @@ export default function UsedMachineDetailPage() {
         </div>
       </div>
     </MainLayout>
+        </ProtectedRoute>
+
   );
 }
