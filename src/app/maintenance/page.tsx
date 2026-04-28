@@ -97,11 +97,11 @@ export default function ProductsPage() {
           placeholder: 'Enter problem_details name'
         },
          { 
-          name: 'report ', 
-          label: 'report  Name', 
-          type: 'text', 
+          name: 'report', 
+          label: 'report', 
+          type: 'textarea', 
           required: true,
-          placeholder: 'Enter report  name'
+          placeholder: 'Enter report '
         },
           { 
           name: 'status', 
