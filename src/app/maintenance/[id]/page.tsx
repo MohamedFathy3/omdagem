@@ -22,8 +22,8 @@ interface UserData {
     phone: string;
     role: string;
     active: boolean;
-    report: string; // Add this line
   };
+  report: string; // Add this line
   id: number;
   name: string;
   phone: string;
@@ -296,7 +296,7 @@ export default function UserDetailPage() {
                         <div className="text-xs text-gray-500 dark:text-gray-400">report </div>
                         <div className="flex items-center gap-2">
                           <span className="font-medium text-gray-900 dark:text-white">
-                            {user.user?.report }
+                            {user?.report }
                           </span>
                         </div>
                       </div>
