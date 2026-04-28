@@ -96,6 +96,13 @@ export default function ProductsPage() {
           required: true,
           placeholder: 'Enter problem_details name'
         },
+         { 
+          name: 'report ', 
+          label: 'report  Name', 
+          type: 'text', 
+          required: true,
+          placeholder: 'Enter report  name'
+        },
           { 
           name: 'status', 
           label: 'status', 

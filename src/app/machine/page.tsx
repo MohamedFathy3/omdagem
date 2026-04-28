@@ -5,22 +5,19 @@ import { MultiImageUploader } from "@/components/Tablecomponents/MultiImageUploa
 import { Eye, Search, Filter, Moon, Sun } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { MediaOrUploadSelector } from "@/components/Tablecomponents/MediaOrUploadSelector"; // 🔥 استيراد MediaSelector
-import ProtectedRoute from '@/components/ProtectedRoute';
 
 
 export default function ProductsPage() {
       const router = useRouter();
 
       const handleViewUser = (userId: number) => {
-    router.push(`/machine/${userId}`);
+    router.push(`/merchant/${userId}`);
   };
 
   return (
-        <ProtectedRoute allowedRoles={['admin']}>
-
       <GenericDataManager
-            endpoint="used-machine"
-            title="used-machine"
+            endpoint="merchant"
+            title="merchant"
             columns={[
               { 
                 key: 'id', 
@@ -46,12 +43,7 @@ export default function ProductsPage() {
                   </div>
                 )
               },
-           { 
-                key: 'price', 
-                label: 'price', 
-                sortable: true,
-           
-              },
+          
                 {
         key: "imageUrl",
         label: "Image",
@@ -65,7 +57,12 @@ export default function ProductsPage() {
         )
       },
             
-           
+              { 
+                key: 'phone', 
+                label: 'phone', 
+                sortable: true,
+               
+              },
           
               {
                 key: 'actions',
@@ -85,60 +82,55 @@ export default function ProductsPage() {
               }
             ]}
 
-   additionalData={[
-        { key: 'engineer', endpoint: '/engineer' },
-      ]}
      formFields={[
         { 
-          name: 'problem_details', 
-          label: 'problem_details Name', 
+          name: 'name', 
+          label: 'name ', 
           type: 'text', 
           required: true,
-          placeholder: 'Enter problem_details name'
+          placeholder: 'Enter merchant name'
         },
           { 
-          name: 'status', 
-          label: 'status', 
-          type: 'select', 
+          name: 'phone', 
+          label: 'phone', 
+          type: 'text', 
           required: false,
-          options: [
-    { value: 'pending', label: 'pending' },      // سعودي
-    { value: 'in_progress', label: 'in_progress' },      // إماراتي
- 
-    { value: 'completed', label: 'completed' }  
-          ],
-          defaultValue: 'pending'
-        },
+          },
+
+
+            { 
+          name: 'facebook_link', 
+          label: 'facebook_link', 
+          type: 'url', 
+          required: false,
+          },
+
+            { 
+          name: 'whatsapp_number', 
+          label: 'whatsapp_number', 
+          type: 'text', 
+          required: false,
+          },
+
        {
-          name: 'engineer_id',
-          label: 'engineer',
-          type: 'select',
-          optionsKey: 'engineer',
+          name: 'password',
+          label: 'password',
+          type: 'password',
           required: true,
-          placeholder: 'Select engineer',
+          placeholder: 'password',
         },
-        {
-             name: "image",
-             label: "Slider Image",
-             type: "custom",
-             component: MediaOrUploadSelector, // ✅ استخدم MediaSelector مباشرة
-             useExistingMedia: true, // ✅ أضف هذه الخاصية
-             mediaType: "image", // ✅ نوع الوسائط
-             required: true,
-             allowUpload: true,
-           },
+   
      
       ]}
 
 
-
+initialData={{ role: 'merchant' }} // علشان يبعت type عند الحفظ
+      defaultFilters={{ role: 'merchant' }}
             showAddButton={false}
             showEditButton={true}
             showDeleteButton={true}
             showBulkActions={true}
             showDeletedToggle={true}
     />
-        </ProtectedRoute>
-
   );
 }

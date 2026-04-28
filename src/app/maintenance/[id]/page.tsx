@@ -22,6 +22,7 @@ interface UserData {
     phone: string;
     role: string;
     active: boolean;
+    report: string; // Add this line
   };
   id: number;
   name: string;
@@ -288,6 +289,14 @@ export default function UserDetailPage() {
                           }`}></span>
                           <span className="font-medium text-gray-900 dark:text-white">
                             {user.active ? 'Active Account' : 'Inactive Account'}
+                          </span>
+                        </div>
+                      </div>
+                       <div className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                        <div className="text-xs text-gray-500 dark:text-gray-400">report </div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium text-gray-900 dark:text-white">
+                            {user.user?.report }
                           </span>
                         </div>
                       </div>
