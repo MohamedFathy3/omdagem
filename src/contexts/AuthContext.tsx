@@ -48,13 +48,36 @@ const removeStoredToken = () => {
   }
 };
 
+// ✅ Helper function to safely get role as string
+const getRoleAsString = (role: string | string[] | undefined): string => {
+  if (!role) return 'user';
+  if (typeof role === 'string') return role.toLowerCase();
+  if (Array.isArray(role) && role.length > 0) return role[0].toLowerCase();
+  return 'user';
+};
+
+// ✅ Function to determine route based on role (FIXED)
+const getRoleBasedRoute = (role: string | string[] | undefined): string => {
+  const roleStr = getRoleAsString(role);
+  
+  switch (roleStr) {
+    case 'admin':
+      return '/';
+    case 'delivery':
+      return '/DeliveryService';
+    case 'coach':
+    case 'trainer':
+      return '/coach/dashboard';
+    case 'user':
+    case 'client':
+    default:
+      return '/';
+  }
+};
+
 // ✅ Updated: Use a simpler approach - just validate token without complex endpoint
 async function fetchUser(token: string): Promise<AuthUser | null> {
   try {
-    // Since the check-auth endpoint doesn't exist, we can:
-    // Option 1: Use a different endpoint that exists (like getting user profile)
-    // Option 2: Return null and let the token be validated on each request
-    
     console.log('🔐 Attempting to fetch user with token');
     
     // Try to get user data from a known working endpoint
@@ -93,7 +116,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const storedUser = localStorage.getItem('auth_user');
       if (storedUser) {
         try {
-          setUser(JSON.parse(storedUser));
+          const parsedUser = JSON.parse(storedUser);
+          setUser(parsedUser);
         } catch (e) {
           console.error('Failed to parse stored user', e);
         }
@@ -101,9 +125,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
     setLoading(false);
   }, []);
-
-  // ✅ Simplified: Don't try to fetch user on every load since endpoint is broken
-  // Just use the user data from login
 
   const loginMutation = useMutation({
     mutationFn: async (credentials: { email: string; password: string; remember?: boolean }) => {
@@ -128,13 +149,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         
         console.log('✅ Token and user data saved to localStorage');
         
-        // ✅ Redirect based on role
+        // ✅ Redirect based on role (FIXED - using safe function)
         const role = userData.role;
-        if (role) {
-          const targetPath = getRoleBasedRoute(role);
-          console.log(`🎯 Login successful, redirecting ${role} to: ${targetPath}`);
-          router.push(targetPath);
-        }
+        const targetPath = getRoleBasedRoute(role);
+        console.log(`🎯 Login successful, redirecting to: ${targetPath}`);
+        router.push(targetPath);
       } else {
         console.error('Login response missing expected data', data);
       }
@@ -193,21 +212,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem('auth_user', JSON.stringify(newUser));
   };
 
-  // ✅ Function to determine route based on role
-  const getRoleBasedRoute = (role: string): string => {
-    switch (role?.toLowerCase()) {
-      case 'admin':
-        return '/';
-      case 'delivery':
-        return '/DeliveryService';
-      default:
-        return '/';
-    }
-  };
-
-  // ✅ Check if user needs to be redirected
-  const checkIfNeedsRedirect = (currentPath: string, userRole: string): boolean => {
-    const roleLower = userRole?.toLowerCase();
+  // ✅ Check if user needs to be redirected (FIXED)
+  const checkIfNeedsRedirect = (currentPath: string, userRole: string | string[] | undefined): boolean => {
+    const roleStr = getRoleAsString(userRole);
     const pathLower = currentPath?.toLowerCase() || '';
     
     // Public pages - no redirect needed
@@ -217,7 +224,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
     
     // Delivery role restrictions
-    if (roleLower === 'delivery') {
+    if (roleStr === 'delivery') {
       // Redirect if trying to access admin or other non-delivery pages
       if (!pathLower.startsWith('/deliveryservice/') && pathLower !== '/deliveryservice') {
         return true;
@@ -228,16 +235,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return false;
   };
 
-  // ✅ Function to redirect based on role
+  // ✅ Function to redirect based on role (FIXED)
   const redirectBasedOnRole = () => {
     if (user?.role) {
       const targetPath = getRoleBasedRoute(user.role);
-      console.log(`🔄 Manually redirecting ${user.role} to: ${targetPath}`);
+      console.log(`🔄 Manually redirecting to: ${targetPath}`);
       router.push(targetPath);
     }
   };
 
-  // ✅ Function to check access permission
+  // ✅ Function to check access permission (FIXED)
   const checkAccess = (path: string): boolean => {
     if (!user?.role) return false;
     return !checkIfNeedsRedirect(path, user.role);
