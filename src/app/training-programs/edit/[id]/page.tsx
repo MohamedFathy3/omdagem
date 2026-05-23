@@ -579,11 +579,11 @@ const fetchData = async () => {
                           key={day.id}
                           day={day}
                           dayIndex={idx}
-                          onUpdateDay={(f, v) => updateDay(idx, f, v)}
+                          onUpdateDay={(f: string, v: any) => updateDay(idx, f, v)}
                           onRemoveDay={() => removeDay(idx)}
                           onAddExercise={() => addExerciseToDay(idx)}
-                          onUpdateExercise={(exIdx, f, v) => updateExerciseInDay(idx, exIdx, f, v)}
-                          onRemoveExercise={(exIdx) => removeExerciseFromDay(idx, exIdx)}
+                          onUpdateExercise={(exIdx: number, f: string, v: any) => updateExerciseInDay(idx, exIdx, f, v)}
+                          onRemoveExercise={(exIdx: number) => removeExerciseFromDay(idx, exIdx)}
                           exercisesList={exercises}
                           onDrop={(e: React.DragEvent, dayIdx: number, action: string) => handleDropOnDay(dayIdx, e, action)}
                           activeDropDay={activeDropDay}
