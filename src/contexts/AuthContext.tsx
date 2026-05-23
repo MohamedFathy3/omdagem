@@ -1,7 +1,8 @@
+// context/AuthContext.tsx
 'use client';
 
 import { createContext, useContext, useEffect, useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiFetch } from '@/lib/api';
 import { AuthUser } from '@/types/auth';
 import { useRouter, usePathname } from 'next/navigation';
@@ -48,55 +49,30 @@ const removeStoredToken = () => {
   }
 };
 
-// ✅ Helper function to safely get role as string
-const getRoleAsString = (role: string | string[] | undefined): string => {
-  if (!role) return 'user';
-  if (typeof role === 'string') return role.toLowerCase();
-  if (Array.isArray(role) && role.length > 0) return role[0].toLowerCase();
+// Helper function to get role from user data
+const getUserRole = (userData: AuthUser | null): string => {
+  if (!userData) return 'user';
+  if (typeof userData.role === 'string') return userData.role.toLowerCase();
+  if (Array.isArray(userData.role) && userData.role.length > 0) return userData.role[0].toLowerCase();
   return 'user';
 };
 
-// ✅ Function to determine route based on role (FIXED)
+// Function to determine route based on role
 const getRoleBasedRoute = (role: string | string[] | undefined): string => {
-  const roleStr = getRoleAsString(role);
+  const roleStr = typeof role === 'string' ? role.toLowerCase() : 
+                  Array.isArray(role) && role.length > 0 ? role[0].toLowerCase() : 'user';
   
   switch (roleStr) {
     case 'admin':
-      return '/';
+      return '/dashboard';
     case 'delivery':
       return '/DeliveryService';
-    case 'coach':
-    case 'trainer':
-      return '/coach/dashboard';
-    case 'user':
-    case 'client':
+    case 'company':
+      return '/company';
     default:
       return '/';
   }
 };
-
-// ✅ Updated: Use a simpler approach - just validate token without complex endpoint
-async function fetchUser(token: string): Promise<AuthUser | null> {
-  try {
-    console.log('🔐 Attempting to fetch user with token');
-    
-    // Try to get user data from a known working endpoint
-    // For now, we'll return null and rely on the stored user data from login
-    // You can implement a proper endpoint later like: /api/user/profile
-    
-    // Example of trying a different endpoint:
-    // const res = await apiFetch('/back/user/profile', {
-    //   headers: { 'Authorization': `Bearer ${token}` }
-    // });
-    // if (res && res.status === true && res.data) return res.data;
-    
-    // For now, return null - we'll use the user data from login
-    return null;
-  } catch (error) {
-    console.log('❌ fetchUser error:', error);
-    return null;
-  }
-}
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -118,6 +94,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         try {
           const parsedUser = JSON.parse(storedUser);
           setUser(parsedUser);
+          console.log('✅ Auth initialized from storage:', parsedUser);
         } catch (e) {
           console.error('Failed to parse stored user', e);
         }
@@ -136,22 +113,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return res;
     },
     onSuccess: (data) => {
-      // ✅ Handle your API response structure
-      if (data.token && data.status === true && data.data) {
+      console.log('📦 Login response:', data);
+      
+      // ✅ Handle API response structure: { result, data, message, status, token }
+      if (data.status === true && data.token && data.data) {
         // Save token
         setStoredToken(data.token);
         setToken(data.token);
         
-        // Save user data
-        const userData = data.data as AuthUser;
+        // Create user object with default role if not provided
+        const userData: AuthUser = {
+          id: data.data.id,
+          name: data.data.name,
+          email: data.data.email,
+          phone: data.data.phone || '',
+          address: '',
+          remember: false,
+          role: 'admin', // ✅ Set default role since API doesn't return role
+          phoneExt: '',
+          password: '',
+          cell: '',
+          created_at: data.data.created_at,
+          updated_at: data.data.updated_at,
+        };
+        
         setUser(userData);
         localStorage.setItem('auth_user', JSON.stringify(userData));
         
         console.log('✅ Token and user data saved to localStorage');
+        console.log('👤 User role set to:', userData.role);
         
-        // ✅ Redirect based on role (FIXED - using safe function)
-        const role = userData.role;
-        const targetPath = getRoleBasedRoute(role);
+        // ✅ Redirect based on role
+        const targetPath = getRoleBasedRoute(userData.role);
         console.log(`🎯 Login successful, redirecting to: ${targetPath}`);
         router.push(targetPath);
       } else {
@@ -159,7 +152,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     },
     onError: (error) => {
-      console.log('❌ Login mutation error:', error);
+      console.error('❌ Login mutation error:', error);
     },
   });
 
@@ -169,7 +162,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await loginMutation.mutateAsync(credentials);
       return true;
     } catch (error) {
-      console.log('❌ Login failed:', error);
+      console.error('❌ Login failed:', error);
       return false;
     } finally {
       setLoading(false);
@@ -178,14 +171,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = async () => {
     try {
-      const token = getStoredToken();
-      if (token) {
-        // Try to call logout endpoint if it exists
+      const currentToken = getStoredToken();
+      if (currentToken) {
         try {
           await apiFetch('admin/logout', {
             method: 'POST',
             headers: {
-              'Authorization': `Bearer ${token}`,
+              'Authorization': `Bearer ${currentToken}`,
             },
           });
         } catch (e) {
@@ -212,30 +204,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem('auth_user', JSON.stringify(newUser));
   };
 
-  // ✅ Check if user needs to be redirected (FIXED)
   const checkIfNeedsRedirect = (currentPath: string, userRole: string | string[] | undefined): boolean => {
-    const roleStr = getRoleAsString(userRole);
+    const roleStr = typeof userRole === 'string' ? userRole.toLowerCase() : 
+                    Array.isArray(userRole) && userRole.length > 0 ? userRole[0].toLowerCase() : '';
     const pathLower = currentPath?.toLowerCase() || '';
     
-    // Public pages - no redirect needed
     const publicPaths = ['/auth', '/about', '/contact'];
     if (publicPaths.includes(pathLower) || pathLower.startsWith('/auth/')) {
       return false;
     }
     
-    // Delivery role restrictions
-    if (roleStr === 'delivery') {
-      // Redirect if trying to access admin or other non-delivery pages
-      if (!pathLower.startsWith('/deliveryservice/') && pathLower !== '/deliveryservice') {
-        return true;
-      }
-    }
-    
-    // Admin has access to everything
     return false;
   };
 
-  // ✅ Function to redirect based on role (FIXED)
   const redirectBasedOnRole = () => {
     if (user?.role) {
       const targetPath = getRoleBasedRoute(user.role);
@@ -244,7 +225,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  // ✅ Function to check access permission (FIXED)
   const checkAccess = (path: string): boolean => {
     if (!user?.role) return false;
     return !checkIfNeedsRedirect(path, user.role);
