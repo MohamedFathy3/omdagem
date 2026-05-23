@@ -28,7 +28,7 @@ const AuthContext = createContext<AuthContextType>({
   checkAccess: () => true,
 });
 
-// دالة مساعدة للتعامل مع التوكن في localStorage
+// Helper functions for token management
 const getStoredToken = (): string | null => {
   if (typeof window !== 'undefined') {
     return localStorage.getItem('auth_token');
@@ -48,47 +48,26 @@ const removeStoredToken = () => {
   }
 };
 
-async function fetchUser(): Promise<AuthUser | null> {
+// ✅ Updated: Use a simpler approach - just validate token without complex endpoint
+async function fetchUser(token: string): Promise<AuthUser | null> {
   try {
-    const token = getStoredToken();
-    if (!token) {
-      console.log('❌ No token found in localStorage');
-      return null;
-    }
-
-    console.log('🔐 Using token from localStorage:', token.substring(0, 10) + '...');
+    // Since the check-auth endpoint doesn't exist, we can:
+    // Option 1: Use a different endpoint that exists (like getting user profile)
+    // Option 2: Return null and let the token be validated on each request
     
-    const res = await apiFetch('/get-admin', {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-      },
-    });
+    console.log('🔐 Attempting to fetch user with token');
     
-    console.log('📦 API Response:', res);
+    // Try to get user data from a known working endpoint
+    // For now, we'll return null and rely on the stored user data from login
+    // You can implement a proper endpoint later like: /api/user/profile
     
-    if (res) {
-      // ✅ دمج البيانات بشكل صحيح
-      if (res.data && res.role) {
-        // الحالة: { role: "admin", data: { ... } }
-        return {
-          ...res.data,
-          role: res.role  // إضافة الـ role من الخارج
-        } as AuthUser;
-      }
-      else if (res.data) {
-        // الحالة: { data: { ... } } بدون role خارجي
-        return res.data as AuthUser;
-      }
-      else if (res.admin) {
-        // الحالة: { admin: { ... } }
-        return res.admin as AuthUser;
-      }
-      else if (res.id) {
-        // الحالة: object عادي
-        return res as AuthUser;
-      }
-    }
+    // Example of trying a different endpoint:
+    // const res = await apiFetch('/back/user/profile', {
+    //   headers: { 'Authorization': `Bearer ${token}` }
+    // });
+    // if (res && res.status === true && res.data) return res.data;
     
+    // For now, return null - we'll use the user data from login
     return null;
   } catch (error) {
     console.log('❌ fetchUser error:', error);
@@ -101,55 +80,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const queryClient = useQueryClient();
   const [token, setToken] = useState<string | null>(null);
-  const [initialCheckDone, setInitialCheckDone] = useState(false);
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  // تهيئة التوكن عند التحميل
+  // Initialize token and try to restore user data on load
   useEffect(() => {
     const storedToken = getStoredToken();
     if (storedToken) {
       setToken(storedToken);
-    }
-  }, []);
-
-  const { data: user, isLoading } = useQuery<AuthUser | null, Error>({
-    queryKey: ['user', token],
-    queryFn: fetchUser,
-    enabled: !!token,
-    staleTime: 5 * 60 * 1000,
-    retry: false,
-  });
-
-  // ✅ للتشخيص - عرض الـ user object
-  useEffect(() => {
-    if (user) {
-      console.log('👤 Final user object in AuthContext:', user);
-      console.log('👤 User role:', user.role);
-    }
-  }, [user]);
-
-  // ✅ التوجيه التلقائي بناء على الـ role
-  useEffect(() => {
-    if (!isLoading && user && initialCheckDone) {
-      const role = Array.isArray(user.role) ? user.role[0] : user.role;
-      console.log('👤 User role detected:', role);
-      console.log('📍 Current path:', pathname);
       
-      const shouldRedirect = checkPathAccess(pathname, role);
-      if (shouldRedirect) {
-        const targetPath = getRoleBasedRoute(role);
-        console.log(`🔄 Redirecting ${role} to: ${targetPath}`);
-        router.push(targetPath);
+      // Try to restore user data from localStorage
+      const storedUser = localStorage.getItem('auth_user');
+      if (storedUser) {
+        try {
+          setUser(JSON.parse(storedUser));
+        } catch (e) {
+          console.error('Failed to parse stored user', e);
+        }
       }
     }
-    
-    if (!isLoading) {
-      setInitialCheckDone(true);
-    }
-  }, [user, isLoading, pathname, router, initialCheckDone]);
+    setLoading(false);
+  }, []);
+
+  // ✅ Simplified: Don't try to fetch user on every load since endpoint is broken
+  // Just use the user data from login
 
   const loginMutation = useMutation({
     mutationFn: async (credentials: { email: string; password: string; remember?: boolean }) => {
-      const res = await apiFetch('admin/login', {
+      const res = await apiFetch('login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(credentials),
@@ -157,31 +115,45 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return res;
     },
     onSuccess: (data) => {
-      if (data.token) {
+      // ✅ Handle your API response structure
+      if (data.token && data.status === true && data.data) {
+        // Save token
         setStoredToken(data.token);
         setToken(data.token);
-        console.log('✅ Token saved to localStorage');
-        queryClient.invalidateQueries({ queryKey: ['user'] });
         
-        setTimeout(() => {
-          if (data.role || data.data?.role) {
-            const role = data.role || data.data?.role;
-            const targetPath = getRoleBasedRoute(role);
-            console.log(`🎯 Login successful, redirecting ${role} to: ${targetPath}`);
-            router.push(targetPath);
-          }
-        }, 100);
+        // Save user data
+        const userData = data.data as AuthUser;
+        setUser(userData);
+        localStorage.setItem('auth_user', JSON.stringify(userData));
+        
+        console.log('✅ Token and user data saved to localStorage');
+        
+        // ✅ Redirect based on role
+        const role = userData.role;
+        if (role) {
+          const targetPath = getRoleBasedRoute(role);
+          console.log(`🎯 Login successful, redirecting ${role} to: ${targetPath}`);
+          router.push(targetPath);
+        }
+      } else {
+        console.error('Login response missing expected data', data);
       }
+    },
+    onError: (error) => {
+      console.log('❌ Login mutation error:', error);
     },
   });
 
   const login = async (credentials: { email: string; password: string; remember?: boolean }) => {
     try {
+      setLoading(true);
       await loginMutation.mutateAsync(credentials);
       return true;
     } catch (error) {
       console.log('❌ Login failed:', error);
       return false;
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -189,78 +161,93 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const token = getStoredToken();
       if (token) {
-        await apiFetch('admin-logout', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
-        });
+        // Try to call logout endpoint if it exists
+        try {
+          await apiFetch('admin/logout', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+            },
+          });
+        } catch (e) {
+          console.log('Logout endpoint failed, continuing with client-side logout');
+        }
       }
     } catch (error) {
       console.log('Logout API call failed, but proceeding anyway');
     }
 
+    // Clear all stored data
     removeStoredToken();
+    localStorage.removeItem('auth_user');
     setToken(null);
-    queryClient.removeQueries({ queryKey: ['user'] });
+    setUser(null);
     queryClient.clear();
     
-    window.location.href = '/auth';
+    // Redirect to Login page
+    router.push('/auth');
   };
 
   const updateUser = (newUser: AuthUser) => {
-    queryClient.setQueryData(['user'], newUser);
+    setUser(newUser);
+    localStorage.setItem('auth_user', JSON.stringify(newUser));
   };
 
+  // ✅ Function to determine route based on role
   const getRoleBasedRoute = (role: string): string => {
     switch (role?.toLowerCase()) {
       case 'admin':
         return '/';
-      case 'company':
-        return '/company';
+      case 'delivery':
+        return '/DeliveryService';
       default:
         return '/';
     }
   };
 
-  const checkPathAccess = (path: string, role: string): boolean => {
-    const roleLower = role?.toLowerCase();
-    const pathLower = path?.toLowerCase();
+  // ✅ Check if user needs to be redirected
+  const checkIfNeedsRedirect = (currentPath: string, userRole: string): boolean => {
+    const roleLower = userRole?.toLowerCase();
+    const pathLower = currentPath?.toLowerCase() || '';
     
-    const publicPaths = ['/auth', '/', '/about', '/contact'];
-    if (publicPaths.includes(path) || path.startsWith('/auth/')) {
+    // Public pages - no redirect needed
+    const publicPaths = ['/auth', '/about', '/contact'];
+    if (publicPaths.includes(pathLower) || pathLower.startsWith('/auth/')) {
       return false;
     }
-
-    if (roleLower === 'company') {
-      if (!pathLower.startsWith('/company') && !pathLower.startsWith('/product')) {
+    
+    // Delivery role restrictions
+    if (roleLower === 'delivery') {
+      // Redirect if trying to access admin or other non-delivery pages
+      if (!pathLower.startsWith('/deliveryservice/') && pathLower !== '/deliveryservice') {
         return true;
       }
     }
     
+    // Admin has access to everything
     return false;
   };
 
+  // ✅ Function to redirect based on role
   const redirectBasedOnRole = () => {
     if (user?.role) {
-      const role = Array.isArray(user.role) ? user.role[0] : user.role;
-      const targetPath = getRoleBasedRoute(role);
-      console.log(`🔄 Redirecting ${role} to: ${targetPath}`);
+      const targetPath = getRoleBasedRoute(user.role);
+      console.log(`🔄 Manually redirecting ${user.role} to: ${targetPath}`);
       router.push(targetPath);
     }
   };
 
+  // ✅ Function to check access permission
   const checkAccess = (path: string): boolean => {
     if (!user?.role) return false;
-    const role = Array.isArray(user.role) ? user.role[0] : user.role;
-    return !checkPathAccess(path, role);
+    return !checkIfNeedsRedirect(path, user.role);
   };
 
   return (
     <AuthContext.Provider
       value={{
-        user: user ?? null,
-        loading: isLoading,
+        user,
+        loading,
         login,
         logout,
         updateUser,

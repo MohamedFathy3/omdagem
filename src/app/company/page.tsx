@@ -11,16 +11,14 @@ import ProtectedRoute from '@/components/ProtectedRoute';
 export default function ProductsPage() {
       const router = useRouter();
 
-      const handleViewUser = (userId: number) => {
-    router.push(`/company/${userId}`);
-  };
+  
 
   return (
         <ProtectedRoute allowedRoles={['admin']}>
 
       <GenericDataManager
-            endpoint="company"
-            title="Company"
+            endpoint="training"
+            title="training"
             columns={[
               { 
                 key: 'id', 
@@ -31,8 +29,8 @@ export default function ProductsPage() {
                 )
               },
               { 
-                key: 'company_name', 
-                label: 'company_name', 
+                key: 'name', 
+                label: 'name', 
                 sortable: true,
                 render: (item) => (
                   <div className="flex items-center gap-3">
@@ -45,88 +43,81 @@ export default function ProductsPage() {
                     ) : (
                       <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
                         <span className="text-xs font-medium">
-                          {item.name?.charAt(0) || 'U'}
+                          {item.name || 'U'}
                         </span>
                       </div>
                     )}
-                    <div>
-                      <div className="font-medium">{item.company_name || 'No Name'}</div>
-                      <div className="text-xs text-gray-500 dark:text-gray-400">
-                        {item.company_description}
-                      </div>
-                          <div className="text-xs text-gray-500 dark:text-gray-400">
-                        {item.company_address}
-                      </div>
-                    </div>
+                  
                   </div>
                 )
               },
            { 
-                key: 'phone', 
-                label: 'phone', 
+                key: 'coache_game_settings', 
+                label: 'coache_game_settings', 
                 sortable: true,
            
               },
                
-            
+            { 
+                key: 'user_game_settings', 
+                label: 'user_game_settings', 
+                sortable: true,
            
-          
-              {
-                key: 'actions',
-                label: 'Actions',
-                render: (item) => (
-                  <button
-                    onClick={() => handleViewUser(item.id)}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
-                      
-                     'bg-gray-700 hover:bg-gray-600 text-white'
-                    }`}
-                  >
-                    <Eye size={16} />
-                    View Details
-                  </button>
-                )
-              }
+              },
+           
+            { 
+                key: 'day_training', 
+                label: 'day_training', 
+                sortable: true,
+           
+              },
+                { 
+                key: 'user_game_settings', 
+                label: 'user_game_settings', 
+                sortable: true,
+           
+              },
+             
             ]}
-
+  additionalData={[
+  { 
+    key: 'engineer', 
+    endpoint: '/user',
+  
+  },      
+]}
      formFields={[
         { 
-          name: 'company_name', 
-          label: 'company_name Name', 
+          name: 'name', 
+          label: ' Name', 
           type: 'text', 
           required: true,
-          placeholder: 'Enter company_name '
+          placeholder: 'Enter name '
         },
           { 
-          name: 'company_description', 
-          label: 'company_description', 
-          type: 'text', 
+          name: 'coache_game_settings', 
+          label: 'coache_game', 
+          type: 'number', 
           required: false,
           
         },
        {
-          name: 'company_address',
-          label: 'company_address',
-          type: 'text',
+          name: 'day_training',
+          label: 'day_training',
+          type: 'date',
       
           required: true,
-          placeholder: ' company_address',
+          placeholder: ' day_training',
         },
-          {
-          name: 'phone',
-          label: 'phone',
-          type: 'text',
-      
+        
+    
+        {
+          name: 'user_id',
+          label: 'trainer',
+          type: 'select',
+          optionsKey: 'engineer',
           required: true,
-          placeholder: ' phone',
-        },
-            {
-          name: 'password',
-          label: 'password',
-          type: 'password',
-      
-          required: false,
-          placeholder: ' password',
+          placeholder: 'Select trainer',
         },
         {
              name: "image",
@@ -138,12 +129,20 @@ export default function ProductsPage() {
              required: true,
              allowUpload: true,
            },
-     
+        {
+             name: "video",
+             label: "video",
+             type: "custom",
+             component: MediaOrUploadSelector, // ✅ استخدم MediaSelector مباشرة
+             useExistingMedia: true, // ✅ أضف هذه الخاصية
+             mediaType: "video", // ✅ نوع الوسائط
+             required: true,
+             allowUpload: true,
+           },
       ]}
 
 
- initialData={{ role: "company" }} // علشان يبعت type عند الحفظ
-      defaultFilters={{ role: "company" }}
+
             showAddButton={true}
             showEditButton={true}
             showDeleteButton={true}

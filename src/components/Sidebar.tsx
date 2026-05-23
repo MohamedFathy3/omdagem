@@ -36,17 +36,11 @@ type NavItem = {
 // جميع مسارات التطبيق في مكان واحد
 const navItems: NavItem[] = [
   { name: 'Dashboard', icon: Home, href: '/', roles: ['admin'] },
-  { name: 'Slider', icon: Clock, href: '/slider', roles: ['admin'] },
-  { name: 'User', icon: User, href: '/user', roles: ['admin'] },
-  { name: 'Company', icon: Database, href: '/company', roles: ['admin'] },
-  { name: 'Engineer', icon: Computer, href: '/engineer', roles: ['admin'] },
-  { name: 'Maintenance', icon: Truck, href: '/maintenance', roles: ['admin'] },
-  { name: 'Machine', icon: Package, href: '/machine', roles: ['admin'] },
-  { name: 'Merchant', icon: Database, href: '/merchant', roles: ['admin'] },
-  { name: 'Design', icon: Package, href: '/design', roles: ['admin'] },
-  { name: 'Seller', icon: Ship, href: '/seller', roles: ['admin'] },
-  { name: 'ContactUs', icon: Megaphone, href: '/conectUs', roles: ['admin'] },
-  { name: 'Products', icon: Database, href: '/product', roles: ['company'] },
+  { name: 'Package', icon: Clock, href: '/package', roles: ['admin'] },
+  { name: 'Result', icon: Computer, href: '/engineer', roles: ['admin'] },
+  { name: 'exercise', icon: User, href: '/exercise', roles: ['admin'] },
+  { name: 'training', icon: Database, href: '/training-programs', roles: ['admin'] },
+  { name: 'user', icon: User, href: '/user', roles: ['admin'] },
 ];
 
 export default function Sidebar({

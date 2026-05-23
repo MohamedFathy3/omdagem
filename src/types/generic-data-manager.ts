@@ -171,7 +171,7 @@ export interface FormField {
   // 🔥 الخصائص الجديدة للميديا
   useExistingMedia?: boolean;
   endpoint?: string;
-  mediaType?: 'image' | 'file' | 'all';
+  mediaType?: 'image' | 'file' | 'all' | 'video';
   allowUpload?:boolean;
 }
 
