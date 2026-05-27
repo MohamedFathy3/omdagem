@@ -112,45 +112,48 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
       return res;
     },
-    onSuccess: (data) => {
-      console.log('📦 Login response:', data);
-      
-      // ✅ Handle API response structure: { result, data, message, status, token }
-      if (data.status === true && data.token && data.data) {
-        // Save token
-        setStoredToken(data.token);
-        setToken(data.token);
-        
-        // Create user object with default role if not provided
-        const userData: AuthUser = {
-          id: data.data.id,
-          name: data.data.name,
-          email: data.data.email,
-          phone: data.data.phone || '',
-          address: '',
-          remember: false,
-          role: 'admin', // ✅ Set default role since API doesn't return role
-          phoneExt: '',
-          password: '',
-          cell: '',
-          created_at: data.data.created_at,
-          updated_at: data.data.updated_at,
-        };
-        
-        setUser(userData);
-        localStorage.setItem('auth_user', JSON.stringify(userData));
-        
-        console.log('✅ Token and user data saved to localStorage');
-        console.log('👤 User role set to:', userData.role);
-        
-        // ✅ Redirect based on role
-        const targetPath = getRoleBasedRoute(userData.role);
-        console.log(`🎯 Login successful, redirecting to: ${targetPath}`);
-        router.push(targetPath);
-      } else {
-        console.error('Login response missing expected data', data);
-      }
-    },
+  onSuccess: (data) => {
+  console.log('📦 Login response:', data);
+  
+  // ✅ Handle API response structure: { result, data: { user, token, token_type }, message, status }
+  if (data.status === 200 && data.data?.token && data.data?.user) {
+    // Save token
+    setStoredToken(data.data.token);
+    setToken(data.data.token);
+    
+    // Create user object with role from API response
+    const userData: AuthUser = {
+      id: data.data.user.id,
+      name: data.data.user.name,
+      email: data.data.user.email,
+      phone: data.data.user.phone || '',
+      address: '',
+      remember: false,
+      role: data.data.user.role || 'user', // ✅ Extract role from API response (will be 'admin')
+      phoneExt: '',
+      password: '',
+      cell: '',
+      created_at: data.data.user.created_at,
+      updated_at: data.data.user.updated_at,
+    };
+    
+    setUser(userData);
+    localStorage.setItem('auth_user', JSON.stringify(userData));
+    
+    console.log('✅ Token and user data saved to localStorage');
+    console.log('👤 User role set to:', userData.role);
+    console.log('🎯 Role-based route:', getRoleBasedRoute(userData.role));
+    
+    // ✅ Redirect based on role
+    const targetPath = getRoleBasedRoute(userData.role);
+    console.log(`🎯 Login successful, redirecting to: ${targetPath}`);
+    
+    // Use window.location for hard redirect if needed
+    router.push(targetPath);
+  } else {
+    console.error('Login response missing expected data', data);
+  }
+},
     onError: (error) => {
       console.error('❌ Login mutation error:', error);
     },
