@@ -115,7 +115,7 @@ export default function ResultsManager() {
       if (formData.after_image) formDataToSend.append('after_image', formData.after_image);
 
       if (editingResult) {
-        await apiFetch(`/result/${editingResult.id}`, {
+        await apiFetch(`/result/update/${editingResult.id}`, {
           method: 'POST',
           body: formDataToSend
         });
@@ -146,7 +146,7 @@ export default function ResultsManager() {
     if (!confirm(`Are you sure you want to delete results for ${result.user_name}?`)) return;
     
     try {
-      await apiFetch(`/result/${result.id}`, {
+      await apiFetch(`/result/delete/${result.id}`, {
         method: 'DELETE',
       });
       toast.success('Result deleted successfully!');
