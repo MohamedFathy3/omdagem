@@ -78,6 +78,7 @@ export interface GenericDataManagerProps {
   columns: ColumnDefinition[];
   additionalData?: AdditionalData[];
   formFields?: FormField[];
+  bulkActions?: BulkAction[]; 
   availableFilters?: FilterField[];
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
   initialData?: Record<string, any>;
@@ -110,7 +111,12 @@ export interface ColumnDefinition {
   sortable?: boolean;
   render?: (item: Entity) => React.ReactNode;
 }
-
+export interface BulkAction {
+    label: string;
+    icon?: React.ReactNode;
+    onClick: (selectedIds: number[]) => void | Promise<void>;
+    variant?: 'default' | 'destructive' | 'success' | 'warning';
+}
 export interface AdditionalData {
   key: string;
   endpoint: string;
